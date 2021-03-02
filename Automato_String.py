@@ -1,4 +1,4 @@
-codigoFonte = "\"codigo\"    #$89893128+=-'  fonte  '  '  \"roberto\""
+codigoFonte = "\"codigo fonte teste\"    #$89893128+=-'  fonte  '  '  \"roberto\""
 lexema = ""
 tokens = []
 foundAspas = False
@@ -22,6 +22,8 @@ for caractere in codigoFonte: #Leitura Caractere por Caractere no código fonte
                 # print(lexema+" é uma String")
                 lexema=""
                 foundAspas = False
+    elif caractere == " " and foundAspas: #Caso o caractere seja um espaço em branco e a string já tenha começado
+        lexema+=caractere
 for token in tokens:
     print("<String,"+token+">", "Lexema: " + token);
 for i in notString:
