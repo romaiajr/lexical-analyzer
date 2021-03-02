@@ -1,4 +1,4 @@
-# lexical-analyzer
+# Lexical Analyzer
 
 Analisador Léxico desenvolvido para o MI - PROCESSADORES DE LINGUAGEM DE PROGRAMAÇÃO
 
