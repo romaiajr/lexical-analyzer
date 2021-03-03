@@ -1,4 +1,4 @@
-codigoFonte = "\"codigo fonte teste\"    #$89893128+=-'  fonte  '  '  \"roberto\""
+codigoFonte = "\"codigo fonte teste\"b    #$89893128+=-'  fonte  '  '  \"roberto\""
 lexema = ""
 tokens = []
 foundAspas = False
