@@ -1,62 +1,50 @@
-def lexema_maker(whole_file):
-    #Colocar \s em todo espaço que depois dele vem caracter, com exceção de comentarios e strings
-    lexemas = []
-    foundAspas = False
-    for character in whole_file:
-        isAspas = character=="\""
-
-        if isAspas and foundAspas:
-            foundAspas = False
-        elif isAspas and not foundAspas:
-            foundAspas = True
-def automato_string(lexema):
-    tokens = []
-    lexema = '''/* 
-        teste08 - sem erros
-    */
-    +9\"HELOU MUNDO\"
-    const int MAX = 10, MAX2 = 50;
+class LexemaMaker():
+   
+    def makeLexema(self,code):
+        lexemas = []
+        for line in code.splitlines(): # Dividir código fonte em linhas
+            lexemas+= self.__splitSpaces(line)
+        return lexemas
         
-    string Mensagem = \"Hello world\";
+    def __splitSpaces(self,line):
+        withoutSpaces = line.replace(" ", "\s") # Substituir espaços por \s
+        return withoutSpaces.split("\s")# Separar em lexemas de acordo com o \s
 
-    procedure start {  // comeca aqui o programa principal 
+if __name__ == "__main__": 
+    lex = LexemaMaker()
+    print(lex.makeLexema("Para Testar o Objeto"))
 
-        int idade; 
-        real salario;
-        string nome;
+# # import re
+# # code = re.sub(' +', ' ', code)
+# code = "test for    this \"test for    this\""
+# print(code)
+# def replace_space(text):
+#     counter = 0
+#     firstSpace = ''
+#     openedString = False
+#     for i in range(len(code)):
+#         character = code[i]
+#         isAspas = character == "\""
+#         if isAspas:
+#             if openedString:
+#                 openedString = False
+#             openedString = True
+#         elif character.isspace():
+#             if firstSpace == '':
+#                 firstSpace = i
+#             elif openedString:
+#                 firstSpace = ''
+#             else:
+#                 newCode = code[:firstSpace] + code[i:]
+#                 counter+=1
+#                 firstSpace = i-counter
+#         elif not character.isspace():
+#             # if firstSpace != '':
+#             #     if not openedString:
+#             #         newCode = code[:firstSpace] +"\s"+ code[i:]
+#             firstSpace = ''
+#     return newCode
 
-        print(\"Digite o nome\");
-        read(nome);
-        print(\"Digite a idade\");
-        read(idade);
-        
-        if (idade >= 150) print(\"pode aposentar kkkk\");
-        else {
-            print(\"vai trabalhar\");
-            salario = salario; // hehehe
-        }	
-    
-    } // fim start'''
-
-    openedString = False
-    startString,endString = 0,0
-    for k in range(len(lexema)):
-        porta = lexema[k]
-        if lexema[k] == "\"" and not openedString:
-            openedString = True
-            startString=k   
-        elif lexema[k] == "\"" and openedString:
-            endString=k+1
-            tokens.append("Isso é string"+lexema[startString:endString])
-            openedString = False
-            #print(lexema[startString:endString])
-        #if lexema[k] == " " and k not in range(startString,endString):
-            #lexema[k].replace(lexema[k],"\s")
-            #s = s[:index] + newstring + s[index + 1:]
-            #if character == " " and character+1.isD
-    for lexema in tokens:
-        print(lexema)
-    # // asfasafsfafafas asfa sfasfa afa afasfa
-    # /*  asfaf  fasf ass asss*/
-    # "oi oi oi oi"
-    # /**/
+# code = replace_space(code)
+# print(code)
+#lexemas = []
