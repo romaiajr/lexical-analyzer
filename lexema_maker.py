@@ -52,6 +52,7 @@ def automato_string(lexema):
             #print(lexema[startString:endString])
         #if lexema[k] == " " and k not in range(startString,endString):
             #lexema[k].replace(lexema[k],"\s")
+            #s = s[:index] + newstring + s[index + 1:]
     for lexema in tokens:
         print(lexema)
     # // asfasafsfafafas asfa sfasfa afa afasfa
