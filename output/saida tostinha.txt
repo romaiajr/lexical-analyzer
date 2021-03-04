@@ -1,0 +1,6 @@
+"HELOU MUNDO"
+"Hello world"
+"Digite o nome"
+"Digite a idade"
+"pode aposentar kkkk"
+"vai trabalhar"
