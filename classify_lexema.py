@@ -1,6 +1,7 @@
 class ClassifyLexema():
     
     def getToken(self,lexema):
+        tokens = [],
         word = ''
         counter = 0
         char = self.splitWord(lexema)
@@ -12,22 +13,24 @@ class ClassifyLexema():
                 while char[counter].isidentifier():
                     word += char[counter]
                     counter += 1
-                print(word + " é um identificador")
+                tokens.append(word + " é um identificador")
                 word = ''                  
             elif char[counter].isnumeric():
                 while char[counter].isnumeric():
                     word += char[counter]
                     counter += 1
                 if word.isnumeric():
-                    print(word + " é um número")
+                    tokens.append(word + " é um número")
                 elif word.isdigit():
-                    print(word + " é um digíto")
+                    tokens.append(word + " é um digíto")
                 word = '' 
             else:           
                 word += char[counter]
-                print(char[counter] + " é um simbolo")
+                tokens.append(char[counter] + " é um simbolo")
                 counter += 1
                 word = ''
+            print(tokens)
+            return tokens
            
     def splitWord(self,lexema):
         return [char for char in lexema]
