@@ -1,35 +1,47 @@
-/*
+--------------------------
+TOKENS
+--------------------------
+<Op. Aritmetico, +>
+<Numero, 9>
+<Cadeia de Caracteres>, "HELOU MUNDO">
+<Palavra Reservada, const >
+<Palavra Reservada, int >
+<ID, MAX [2]>
+<Op. Relacional, =>
+<Numero, 10>
+<Delimitador, ,>
+<ID, MAX2 [3]>
+<Op. Relacional, =>
+<Numero, 50>
+<Delimitador, ;>
+<Palavra Reservada, string >
+<ID, Mensagem [5]>
+<Op. Relacional, =>
+<Cadeia de Caracteres>, "Hello world">
+<Delimitador, ;>
+<Palavra Reservada, procedure >
+<Palavra Reservada, start >
+<Delimitador, {>
+--------------------------
 
-teste08
--
-sem
-erros
-*/
-+9"HELOU
-MUNDO"
-const
-int
-MAX
-=
-10,
-MAX2
-=
-50;
 
-string
-Mensagem
-=
-"Hello
-world";
-
-procedure
-start
-{
-
-//
-comeca
-aqui
-o
-programa
-principal
-
+--------------------------
+TABELA DE SIMBOLOS
+--------------------------
+[0] const
+[1] int
+[2] MAX
+[3] MAX2
+[4] string
+[5] Mensagem
+[6] procedure
+[7] start
+[8] idade
+[9] real
+[10] salario
+[11] nome
+[12] print
+[13] read
+[14] if
+[15] else
+--------------------------
