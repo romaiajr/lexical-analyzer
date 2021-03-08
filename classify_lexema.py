@@ -75,7 +75,7 @@ class ClassifyLexema():
                 elif self.delimitadores.__contains__(charList[counter]):
                     tokens.append("<Delimitador, "+charList[counter]+">")
                     counter += 1
-                elif charList[counter] == "+" or charList[counter] == "-" or charList[counter] == "*" or charList[counter] == "/":  # OP. Aritmético
+                elif charList[counter] in {"+","-","*","/"}:  # OP. Aritmético
                     if self.operadorAritmetico.__contains__(charList[counter] + charList[counter+1]):
                         tokens.append(
                             "<Op. Aritmetico, " + charList[counter] + charList[counter+1] + ">")
@@ -84,7 +84,7 @@ class ClassifyLexema():
                         tokens.append("<Op. Aritmetico, " +
                                       charList[counter] + ">")
                         counter += 1
-                elif charList[counter] == "=" or charList[counter] == "!" or charList[counter] == ">" or charList[counter] == "<":  # OP. Relacional
+                elif charList[counter] in {"=","!",">","<"}:  # OP. Relacional
                     if self.operadoresRelacionais.__contains__(charList[counter] + charList[counter+1]):
                         tokens.append(
                             "<Op. Relacional, " + charList[counter] + charList[counter+1] + ">")
@@ -97,7 +97,7 @@ class ClassifyLexema():
                         tokens.append("<Op. Lógico, "+charList[counter]+">")
                         counter += 1
                 # OP. Lógico #REVIEW Código mt extenso?
-                elif charList[counter] == "&" or charList[counter] == "|":
+                elif charList[counter] in {"&","|"}:
                     if self.operadorLogico.__contains__(charList[counter] + charList[counter+1]):
                         tokens.append(
                             "<Op. Logico, " + charList[counter] + charList[counter+1] + ">")
@@ -122,8 +122,8 @@ class ClassifyLexema():
         return self.symbolsTable
 
     def splitWord(self, lexema) -> str:
-        return [char for char in lexema]
-        # return list(lexema)
+        # return [char for char in lexema]
+        return list(lexema)
 
 
 if __name__ == "__main__":
