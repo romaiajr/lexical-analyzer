@@ -33,6 +33,5 @@ for file in files:
             lexema += caractere
     for token in tokens:
         out.write(token+"\n")
-    #for i in notString:
+    # for i in notString:
     #     print(i + " Não é classificado como String")
-

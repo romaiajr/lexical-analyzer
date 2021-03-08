@@ -1,14 +1,16 @@
 def lexema_maker(whole_file):
-    #Colocar \s em todo espaço que depois dele vem caracter, com exceção de comentarios e strings
+    # Colocar \s em todo espaço que depois dele vem caracter, com exceção de comentarios e strings
     lexemas = []
     foundAspas = False
     for character in whole_file:
-        isAspas = character=="\""
+        isAspas = character == "\""
 
         if isAspas and foundAspas:
             foundAspas = False
         elif isAspas and not foundAspas:
             foundAspas = True
+
+
 def automato_string(lexema):
     tokens = []
     lexema = '''/* 
@@ -39,21 +41,21 @@ def automato_string(lexema):
     } // fim start'''
 
     openedString = False
-    startString,endString = 0,0
+    startString, endString = 0, 0
     for k in range(len(lexema)):
         porta = lexema[k]
         if lexema[k] == "\"" and not openedString:
             openedString = True
-            startString=k   
+            startString = k
         elif lexema[k] == "\"" and openedString:
-            endString=k+1
+            endString = k+1
             tokens.append("Isso é string"+lexema[startString:endString])
             openedString = False
-            #print(lexema[startString:endString])
-        #if lexema[k] == " " and k not in range(startString,endString):
-            #lexema[k].replace(lexema[k],"\s")
+            # print(lexema[startString:endString])
+        # if lexema[k] == " " and k not in range(startString,endString):
+            # lexema[k].replace(lexema[k],"\s")
             #s = s[:index] + newstring + s[index + 1:]
-            #if character == " " and character+1.isD
+            # if character == " " and character+1.isD
     for lexema in tokens:
         print(lexema)
     # // asfasafsfafafas asfa sfasfa afa afasfa

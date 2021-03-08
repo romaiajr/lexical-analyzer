@@ -6,7 +6,7 @@ lex = LexemaMaker()
 clex = ClassifyLexema()
 counter = 0
 for file in files:
-    # lexemas = [] 
+    # lexemas = []
     pathName = open(f"./input/{file}", "r")
     codigoFonte = pathName.read()
     out = open("./output/"+file.replace("entrada", "saida"), "w")
