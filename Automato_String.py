@@ -10,9 +10,10 @@ for file in files:
     foundAspas = False
     notString = []
     for caractere in codigoFonte:  # Leitura Caractere por Caractere no código fonte
-        if caractere != " ":  # Caso o caractere não seja um espaço em branco, avançamos
+        isSpace = caractere == " "
+        if not isSpace:  # Caso o caractere não seja um espaço em branco, avançamos
             isAspas = caractere == "\""  # Verifica se o caractere é aspas
-            if foundAspas == False:  # Buscando início da String com "
+            if not foundAspas:  # Buscando início da String com "
                 if not isAspas:
                     lexema += caractere
                 else:  # Encontrou o início Início da String
@@ -29,7 +30,7 @@ for file in files:
                     # print(lexema+" é uma String")
                     lexema = ""
                     foundAspas = False
-        elif caractere == " " and foundAspas:  # Caso o caractere seja um espaço em branco e a string já tenha começado
+        elif isSpace and foundAspas:  # Caso o caractere seja um espaço em branco e a string já tenha começado
             lexema += caractere
     for token in tokens:
         out.write(token+"\n")
