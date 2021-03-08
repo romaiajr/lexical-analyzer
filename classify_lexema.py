@@ -4,43 +4,43 @@ class ClassifyLexema():
     "real", "boolean", "string", "true", "false",
     "global", "local"]
     delimitadores = [";",",","(",")","{","}","[","]","."]
-    operadorAritmetico = ["+","-","*","/","++","--"]
+    operadoresAritmeticos = ["+","-","*","/","++","--"]
     operadoresRelacionais = ["==","!=",">",">=","<","<=","="]
-    operadorLogico = ["&&","||","!"]
+    operadoresLogicos = ["&&","||","!"]
     symbolsTable = []
     
-    def getToken(self,lexema): 
+    def getToken(self,whole_file) -> list: 
         tokens = []
         word = ''
         counter = 0
-        charList = self.splitWord(lexema)#Transforma a linha em letras
+        charList = self.splitWord(whole_file)#Transforma a linha em letras
         length = len(charList)
         
         while counter < length:
-            if charList[counter].isspace(): # Verifica se é um espaço
+            if charList[counter].isspace(): # Verifica se o caracter é um espaço
                 counter += 1
-            elif charList[counter].isidentifier(): # Verifica se é um caracter
+            elif charList[counter].isidentifier(): # Verifica se o caracter é um caracter
                 while charList[counter].isidentifier() or charList[counter].isnumeric():
                     word += charList[counter]
                     counter += 1
                     if counter==length:
                         break    
-                if not self.symbolsTable.__contains__(word):
+                if not self.symbolsTable.__contains__(word): # Insere o lexema na tabela de simbolos
                     self.symbolsTable.append(word)
-                if self.reservedWords.__contains__(word):
+                if self.reservedWords.__contains__(word): # Caso seja uma palavra reservada
                     tokens.append("<Palavra Reservada, "+word+" >")
-                else:
-                    tokens.append("<ID, "+word+" [" + str(self.symbolsTable.index(word))+"]>") #Token ID REVIEW
-                word = ''                  
-            elif charList[counter].isnumeric(): # Verifica se é um número
-                while charList[counter].isnumeric(): #TODO resolver problema de dígitos
+                else: # Se não for uma palavra reservada, será um identificador
+                    tokens.append("<ID, "+word+" [" + str(self.symbolsTable.index(word))+"]>") # REVIEW estrutura do token
+                word = ''                                                                      
+            elif charList[counter].isnumeric(): # Verifica se o caracter é um número
+                while charList[counter].isnumeric(): #TODO resolver problema de dígitos (ponto flutuante)
                     word += charList[counter]
                     counter += 1
                     if counter==length:
                         break
                 if word.isnumeric():
                     tokens.append("<Numero, "+word+">")
-                elif word.isdigit():
+                elif word.isdigit(): #REVIEW classificar como dígito (ponto flutuante)
                     tokens.append("<Digito, "+word+">")
                 word = '' 
             else: # Se não for número, letra ou espaço, será um simbolo
@@ -70,49 +70,42 @@ class ClassifyLexema():
                 elif self.delimitadores.__contains__(charList[counter]): # Delimitadores
                     tokens.append("<Delimitador, "+charList[counter]+">")
                     counter += 1
-                elif charList[counter] == "+" or charList[counter] == "-" or charList[counter] == "*"  or charList[counter] == "/": # OP. Aritmético
-                    if self.operadorAritmetico.__contains__(charList[counter] + charList[counter+1]):
+                elif charList[counter] in {"+","-","*","/"}:  # OP. Aritmético
+                    if self.operadoresAritmeticos.__contains__(charList[counter] + charList[counter+1]): # Contém os casos: [++,--]
                         tokens.append("<Op. Aritmetico, "+ charList[counter] + charList[counter+1] + ">")
                         counter += 2
-                    else:
+                    else: # Contém os casos: [+, -, *, /]
                         tokens.append("<Op. Aritmetico, "+ charList[counter] +">")
                         counter += 1
-                elif charList[counter] == "=" or charList[counter] == "!" or charList[counter] == ">"  or charList[counter] == "<": # OP. Relacional
-                    if self.operadoresRelacionais.__contains__(charList[counter] + charList[counter+1]):
+                elif charList[counter] in {"=","!",">","<"}: #OP. Relacional
+                    if self.operadoresRelacionais.__contains__(charList[counter] + charList[counter+1]): # Contém os casos: [==, !=, >=, <=]
                         tokens.append("<Op. Relacional, "+ charList[counter] + charList[counter+1] + ">")
                         counter += 2
-                    elif self.operadoresRelacionais.__contains__(charList[counter]):
+                    elif self.operadoresRelacionais.__contains__(charList[counter]): # Contém os casos: [=, >, <]
                         tokens.append("<Op. Relacional, "+ charList[counter] +">")
                         counter += 1
-                    else:
+                    else: # Contém o caso: [!], esse caso é classificado como OP. Lógico
                         tokens.append("<Op. Lógico, "+charList[counter]+">")
                         counter += 1                  
-                elif charList[counter] == "&" or charList[counter] == "|": # OP. Lógico #REVIEW Código mt extenso?
-                    if self.operadorLogico.__contains__(charList[counter] + charList[counter+1]):
+                elif charList[counter] in {"&","|"}: # OP. Lógico
+                    if self.operadoresLogicos.__contains__(charList[counter] + charList[counter+1]): # Contém os casos: [&&, ||]
                         tokens.append("<Op. Logico, "+ charList[counter] + charList[counter+1] + ">")
                         counter += 2
-                    # elif self.operadorLogico.__contains__(charList[counter]): # Equivale ao !, porém já foi chamado em Op. Relacionais
-                    #     tokens.append("<Op. Lógico, "+ charList[counter] +">")
-                    #     counter += 1
                     else:
                         tokens.append("<Simbolo, "+charList[counter]+">")
                         counter += 1
-                else:
+                else: #Caso não se encaixe em nenhum dos padrões acima, é classificado como simbolo
                     word+=charList[counter]
                     tokens.append("<Simbolo, "+word+">")
                     counter += 1
                 word = ''
-        # for token in tokens:
-        #     print(token)
-        # print(self.symbolsTable)
         return tokens
     
-    def getSymbolsTable(self):
+    def getSymbolsTable(self) -> list:
         return self.symbolsTable
     
-    def splitWord(self,lexema)->str:
-        return [char for char in lexema]
-        # return list(lexema)
+    def splitWord(self,whole_file)  -> list:
+        return list(whole_file)
 
 if __name__ == "__main__": 
     cl = ClassifyLexema()
