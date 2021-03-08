@@ -1,4 +1,4 @@
-def lexema_maker(whole_file):
+def lexema_maker(whole_file: str):
     # Colocar \s em todo espaço que depois dele vem caracter, com exceção de comentarios e strings
     lexemas = []
     foundAspas = False
@@ -11,7 +11,7 @@ def lexema_maker(whole_file):
             foundAspas = True
 
 
-def automato_string(lexema):
+def automato_string(lexema: str):
     tokens = []
     lexema = '''/* 
         teste08 - sem erros

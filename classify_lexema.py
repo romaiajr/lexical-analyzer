@@ -9,7 +9,7 @@ class ClassifyLexema():
     operadorLogico = ["&&", "||", "!"]
     symbolsTable = []
 
-    def getToken(self, lexema):
+    def getToken(self, lexema: str) -> list:
         tokens = []
         word = ''
         counter = 0
@@ -118,10 +118,10 @@ class ClassifyLexema():
         # print(self.symbolsTable)
         return tokens
 
-    def getSymbolsTable(self):
+    def getSymbolsTable(self) -> list:
         return self.symbolsTable
 
-    def splitWord(self, lexema) -> str:
+    def splitWord(self, lexema: str) -> list:
         # return [char for char in lexema]
         return list(lexema)
 

@@ -1,6 +1,6 @@
 class LexemaMaker():
 
-    def makeLexema(self, code):
+    def makeLexema(self, code: str) -> list:
         lexemas = code.splitlines()
         # for line in code.splitlines(): # Dividir código fonte em linhas
         #     lexemas+= self.__splitSpaces(line)
