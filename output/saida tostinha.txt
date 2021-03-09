@@ -1,80 +1,80 @@
 --------------------------
 TOKENS
 --------------------------
-<Op. Aritmetico, +>
+<Operador Aritmetico, +>
 <Numero, 9>
-<Cadeia de Caracteres>, "HELOU MUNDO">
-<Palavra Reservada, const >
-<Palavra Reservada, int >
-<ID, MAX [2]>
-<Op. Relacional, =>
+<Cadeia de Caracteres, "HELOU MUNDO">
+<Palavra Reservada, const>
+<Palavra Reservada, int>
+<Identificador, 2>
+<Operador Relacional, =>
 <Numero, 10>
-<Delimitador, ,>
-<ID, MAX2 [3]>
-<Op. Relacional, =>
+<Delimitador, >
+<Identificador, 3>
+<Operador Relacional, =>
 <Numero, 50>
-<Delimitador, ;>
-<Palavra Reservada, string >
-<ID, Mensagem [5]>
-<Op. Relacional, =>
-<Cadeia de Caracteres>, "Hello world">
-<Delimitador, ;>
-<Palavra Reservada, procedure >
-<Palavra Reservada, start >
-<Delimitador, {>
-<Palavra Reservada, int >
-<ID, idade [8]>
-<Delimitador, ;>
-<Palavra Reservada, real >
-<ID, salario [10]>
-<Delimitador, ;>
-<Palavra Reservada, string >
-<ID, nome [11]>
-<Delimitador, ;>
-<Palavra Reservada, print >
-<Delimitador, (>
-<Cadeia de Caracteres>, "Digite o nome">
-<Delimitador, )>
-<Delimitador, ;>
-<Palavra Reservada, read >
-<Delimitador, (>
-<ID, nome [11]>
-<Delimitador, )>
-<Delimitador, ;>
-<Palavra Reservada, print >
-<Delimitador, (>
-<Cadeia de Caracteres>, "Digite a idade">
-<Delimitador, )>
-<Delimitador, ;>
-<Palavra Reservada, read >
-<Delimitador, (>
-<ID, idade [8]>
-<Delimitador, )>
-<Delimitador, ;>
-<Palavra Reservada, if >
-<Delimitador, (>
-<ID, idade [8]>
-<Op. Relacional, >=>
+<Delimitador, >
+<Palavra Reservada, string>
+<Identificador, 5>
+<Operador Relacional, =>
+<Cadeia de Caracteres, "Hello world">
+<Delimitador, >
+<Palavra Reservada, procedure>
+<Palavra Reservada, start>
+<Delimitador, >
+<Palavra Reservada, int>
+<Identificador, 8>
+<Delimitador, >
+<Palavra Reservada, real>
+<Identificador, 10>
+<Delimitador, >
+<Palavra Reservada, string>
+<Identificador, 11>
+<Delimitador, >
+<Palavra Reservada, print>
+<Delimitador, >
+<Cadeia de Caracteres, "Digite o nome">
+<Delimitador, >
+<Delimitador, >
+<Palavra Reservada, read>
+<Delimitador, >
+<Identificador, 11>
+<Delimitador, >
+<Delimitador, >
+<Palavra Reservada, print>
+<Delimitador, >
+<Cadeia de Caracteres, "Digite a idade">
+<Delimitador, >
+<Delimitador, >
+<Palavra Reservada, read>
+<Delimitador, >
+<Identificador, 8>
+<Delimitador, >
+<Delimitador, >
+<Palavra Reservada, if>
+<Delimitador, >
+<Identificador, 8>
+<Operador Relacional, >=>
 <Numero, 150>
-<Delimitador, )>
-<Palavra Reservada, print >
-<Delimitador, (>
-<Cadeia de Caracteres>, "pode aposentar kkkk">
-<Delimitador, )>
-<Delimitador, ;>
-<Palavra Reservada, else >
-<Delimitador, {>
-<Palavra Reservada, print >
-<Delimitador, (>
-<Cadeia de Caracteres>, "vai trabalhar">
-<Delimitador, )>
-<Delimitador, ;>
-<ID, salario [10]>
-<Op. Relacional, =>
-<ID, salario [10]>
-<Delimitador, ;>
-<Delimitador, }>
-<Delimitador, }>
+<Delimitador, >
+<Palavra Reservada, print>
+<Delimitador, >
+<Cadeia de Caracteres, "pode aposentar kkkk">
+<Delimitador, >
+<Delimitador, >
+<Palavra Reservada, else>
+<Delimitador, >
+<Palavra Reservada, print>
+<Delimitador, >
+<Cadeia de Caracteres, "vai trabalhar">
+<Delimitador, >
+<Delimitador, >
+<Identificador, 10>
+<Operador Relacional, =>
+<Identificador, 10>
+<Delimitador, >
+<Delimitador, >
+<Delimitador, >
 --------------------------
 
 

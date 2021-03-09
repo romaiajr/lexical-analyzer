@@ -16,7 +16,7 @@ for file in files:
     #     out.write(lexema.strip() +"\n")#
     out.write("--------------------------\nTOKENS\n--------------------------\n")
     for token in clex.getToken(codigoFonte):
-        out.write(token + "\n")
+        out.write(str(token) + "\n")
     out.write("--------------------------\n\n\n--------------------------\nTABELA DE SIMBOLOS\n--------------------------\n")
     for idx, item in enumerate(clex.getSymbolsTable()):
         out.write("[" + str(idx)+"] " + item + "\n")
