@@ -1,7 +1,7 @@
 /* 
 	teste08 - sem erros
 */
-$ &
+$ & £
 "TESTE STRING SEM FECHAR $
 const int MAX = 10ü, MAX2 = 50..3;
 	

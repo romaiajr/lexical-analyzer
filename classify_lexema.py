@@ -25,12 +25,12 @@ class ClassifyLexema():
         line = 1
         
         while counter < length:
-            if charList[counter].isascii(): # Caso de aspas simples sozinha
-                if charList[counter].isspace(): # Verifica se o caracter é um espaço
+            if charList[counter].isspace(): # Verifica se o caracter é um espaço
                     if charList[counter] == "\n":
                         line+=1
                     counter += 1
-                elif charList[counter].isidentifier(): # Verifica se o caracter é uma letra
+            elif self.isAscii(charList[counter]): # Caso de aspas simples sozinha
+                if charList[counter].isidentifier(): # Verifica se o caracter é uma letra
                     while charList[counter].isidentifier() or charList[counter].isnumeric():
                         if charList[counter].isascii():
                             lexema += charList[counter]
@@ -145,9 +145,13 @@ class ClassifyLexema():
     def splitWord(self,whole_file)  -> list:
         return list(whole_file)
     
+    def isAscii(self, char) -> bool:
+        return 32 <= ord(char) <=126
+    
 if __name__ == "__main__": 
     cl = ClassifyLexema()
-    arquivo = ''' $
+    arquivo = '''
+    $
 	'''
     cl.getToken(arquivo)
     for error in cl.getErrorTokens():
