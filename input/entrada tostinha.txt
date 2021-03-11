@@ -3,7 +3,7 @@
 */
 $
 "TESTE STRING SEM FECHAR $
-const int MAX = 10ü, MAX2 = 50;
+const int MAX = 10ü, MAX2 = 50..3;
 	
 string Mensagemü = "Hello world $";
 

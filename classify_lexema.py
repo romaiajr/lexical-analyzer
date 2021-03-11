@@ -30,7 +30,7 @@ class ClassifyLexema():
                     if charList[counter] == "\n":
                         line+=1
                     counter += 1
-                elif charList[counter].isidentifier(): # Verifica se o caracter é um caracter
+                elif charList[counter].isidentifier(): # Verifica se o caracter é uma letra
                     while charList[counter].isidentifier() or charList[counter].isnumeric():
                         if charList[counter].isascii():
                             lexema += charList[counter]
@@ -52,7 +52,18 @@ class ClassifyLexema():
                         counter += 1
                         if counter==length:
                             break
-                    if lexema.isnumeric():
+                    if charList[counter] == ".":
+                        lexema += charList[counter]
+                        counter += 1
+                        if not charList[counter].isnumeric():
+                            self.error_tokens.append(Error_Token(NUMBER_ERROR, lexema, line))
+                            lexema = ""
+                        while charList[counter].isnumeric(): #TODO resolver problema de dígitos (ponto flutuante)
+                            lexema += charList[counter]
+                            counter += 1
+                            if counter==length:
+                                break
+                    if lexema != "":
                         self.tokens.append(Token(NUMBER_TOKEN, lexema, line))
                     # elif lexema.isdigit(): #REVIEW classificar como dígito (ponto flutuante) # Achar segundo ponto classs como delimitador
                     #     self.tokens.append(Token(DIGIT_TOKEN), lexema)
@@ -141,6 +152,4 @@ if __name__ == "__main__":
     cl.getToken(arquivo)
     for error in cl.getErrorTokens():
         print(error)
-    # for linha in arquivo.splitlines():
-    #     cl.getToken(linha)
     
