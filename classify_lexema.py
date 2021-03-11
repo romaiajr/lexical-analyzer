@@ -12,8 +12,8 @@ class ClassifyLexema():
     operadoresLogicos = ["&&","||","!"]
     
     def __init__(self):
-        self.symbols_table = []
-        self.error_tokens = []
+        self.symbols_table:Token = []
+        self.error_tokens:Token = []
         self.tokens = []
 
     def getToken(self,whole_file) -> list: 
@@ -44,7 +44,7 @@ class ClassifyLexema():
                     if self.reservedWords.__contains__(lexema): # Caso seja uma palavra reservada
                         self.tokens.append(Token(RW_TOKEN, lexema, line))
                     else: # Se não for uma palavra reservada, será um identificador
-                        self.tokens.append(Token(ID_TOKEN, str(self.symbols_table.index(lexema)), line))
+                        self.tokens.append(Token(ID_TOKEN, lexema, line))
                     lexema = ''                                                                      
                 elif charList[counter].isnumeric(): # Verifica se o caracter é um número
                     while charList[counter].isnumeric(): #TODO resolver problema de dígitos (ponto flutuante)
@@ -133,6 +133,7 @@ class ClassifyLexema():
                     lexema = ''
             else:
                 self.error_tokens.append(Error_Token(OUT_ASCII_ERROR, charList[counter], line))
+                #self.error_tokens.append("Sou uma string")
                 counter += 1
         return self.tokens
     
@@ -150,10 +151,8 @@ class ClassifyLexema():
     
 if __name__ == "__main__": 
     cl = ClassifyLexema()
-    arquivo = '''
-    $
-	'''
+    arquivo = '''/*
+    alguma coisa'''
     cl.getToken(arquivo)
     for error in cl.getErrorTokens():
         print(error)
-    
