@@ -20,6 +20,8 @@ for file in files:
         out.write("[" + str(idx)+"] " + item + "\n")
     out.write("--------------------------")
     
+# Item fora do alfabeto sendo pego na string, como fazer?    #REVIEW   VERIFICAR DENTRO DO WHILE 
+# /* quebrado tá pegando da mesma forma quando encontra um /    #REVIEW
 #verificar em todos os whiles se o caracter faz parte da tabela ascii #REVIEW isascii não serve já que tem que estar num intervalo
 # cadeia de caracteres até achar o " \n, cadeia de caracter só pega a linha #NOTE
 # simbolo apenas em cadeia de caracteres #NOTE

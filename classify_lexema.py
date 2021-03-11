@@ -125,7 +125,7 @@ class ClassifyLexema():
                             self.tokens.append(Token(OP_L_TOKEN, charList[counter] + charList[counter+1], line))
                             counter += 2
                         else:
-                            self.tokens.append(Error_Token(SYMBOL_ERROR, charList[counter], line))
+                            self.error_tokens.append(Error_Token(OP_ERROR, charList[counter], line))
                             counter += 1
                     else: #Caso não se encaixe em nenhum dos padrões acima, é classificado como simbolo
                         self.error_tokens.append(Error_Token(SYMBOL_ERROR, charList[counter], line))
