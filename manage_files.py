@@ -1,8 +1,6 @@
 import os
-from lexema_maker import LexemaMaker
 from classify_lexema import ClassifyLexema
 files = os.listdir("./input/")
-lex = LexemaMaker()
 counter = 0
 for file in files:
     clex = ClassifyLexema()
