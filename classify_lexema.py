@@ -97,7 +97,9 @@ class ClassifyLexema():
                             if charList[counter] == "\n":
                                 line+=1
                             counter+=1
-                            if counter==length:
+                            if counter==length-1:
+                                lexema += charList[counter]
+                                self.error_tokens.append(Error_Token(COMMENT_ERROR, lexema, line))
                                 break
                         counter+=2
                     elif self.delimitadores.__contains__(charList[counter]): # Delimitadores

@@ -8,11 +8,13 @@ for file in files:
     clex = ClassifyLexema()
     pathName = open(f"./input/{file}", "r")
     codigoFonte = pathName.read()
+    print(codigoFonte)
     out = open("./output/"+file.replace("entrada", "saida"), "w")
-    out.write("--------------------------\nTOKENS\n--------------------------\n")
+    #out.write("--------------------------\nTOKENS\n--------------------------\n")
     for token in clex.getToken(codigoFonte):
         out.write(str(token) + "\n")
-    out.write("\n\n")
+    #out.write("\n\n")
+    out.write("\n")
     for error in clex.getErrorTokens():
         out.write(str(error) + "\n")
     out.write("--------------------------\n\n\n--------------------------\nTABELA DE SIMBOLOS\n--------------------------\n")
