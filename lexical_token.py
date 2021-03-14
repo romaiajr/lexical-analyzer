@@ -13,6 +13,7 @@ NUMBER_ERROR = "NMF" # Número Mal Formado
 COMMENT_ERROR = "CoMF" # Comentário Mal Formado
 OP_ERROR = "OpMF" # Operador Mal Formado
 OUT_ASCII_ERROR = "CNPA" # Caracter Não Pertence ao Alfabeto
+STRING_NO_ASCII = "CCNA" # Cadeia com Caracter Não pertencente ao Alfabeto
 
 class Token():
     '''
