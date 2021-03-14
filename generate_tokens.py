@@ -17,7 +17,7 @@ class GenerateTokens():
     def __init__(self, whole_file:str):
         '''
         Construtor da classe GenerateTokens 
-        whole_file: Conteúdo do arquivo lido
+        whole_file: String contendo todo o conteúdo do arquivo de entrada
         '''
         self.tokens, self.error_tokens, self.symbols_table = [],[],[]
         self.line = 1
@@ -26,8 +26,8 @@ class GenerateTokens():
             
     def initialState(self) -> list:
         '''
-        Representa o estado inicial do autômato.
-        Analisa o tipo do caractere atual e chama o próximo estado equivalente.
+        Estado inicial do autômato.
+        Analisa o tipo do caractere atual e transiciona para o próximo estado equivalente.
         '''
         self.lexema = ''
         if self.itr.cur == None:
@@ -41,7 +41,7 @@ class GenerateTokens():
             if self.itr.cur.isidentifier():
                 return self.ideState()
             elif self.itr.cur.isnumeric():
-                return self.numberStateA()
+                return self.numberState()
             else:
                 return self.symbolState()
         else:
@@ -51,9 +51,9 @@ class GenerateTokens():
             
     def ideState(self):
         '''
-        Representa o estado de Identificadores, responsável por criar 
-        tokens de identificadores e palavras reservadas, retornando para o estado
-        inicial pós-identificação de token
+        Estado de Identificadores, responsável por criar 
+        tokens de identificadores e palavras reservadas, transicionando para o estado
+        inicial, pós-identificação de token
 
 
         Returns: 
@@ -72,16 +72,16 @@ class GenerateTokens():
             self.tokens.append(Token(ID_TOKEN, self.lexema, self.line))
         return self.initialState()                                         
 
-    def numberStateA(self):
+    def numberState(self):
         '''
-        Representa o estado A de Números, responsável por criar 
-        tokens de números. Caso um "." seja encontrado
+        Estado inteiro dos Números, responsável por criar 
+        tokens de números inteiros. Caso um "." seja encontrado
         ocorrerá uma transição para o estado B, se não, retornará o estado inicial
         pós-identificação de token
 
 
         Returns: 
-        numberStateB(): Estado B de Números
+        floatState(): Estado B de Números
         initialState(): Estado Inicial
         '''
         while self.itr.cur.isnumeric():
@@ -91,14 +91,14 @@ class GenerateTokens():
                 break
         if self.itr.cur == ".":
             self.lexema+=self.itr.cur
-            return self.numberStateB()
+            return self.floatState()
         else:
             self.tokens.append(Token(NUMBER_TOKEN, self.lexema, self.line))
             return self.initialState()
 
-    def numberStateB(self):
+    def floatState(self):
         '''
-        Representa o estado B de Números, responsável por criar tokens de números,
+        Estado Decimal dos Números, responsável por criar tokens de números,
         retornando para o estado inicial pós-identificação de token.
 
 
@@ -119,7 +119,7 @@ class GenerateTokens():
 
     def symbolState(self):
         '''
-        Representa o estado de Símbolos, responsável por criar transições para
+        Estado de Símbolos, responsável por criar transições para
         os estados equivalentes a cada símbolo. Retornará ao estado inicial Caso
         o símbolo não corresponda a nenhum dos estados
 
@@ -152,7 +152,7 @@ class GenerateTokens():
 
     def stringState(self):
         """
-        Representa o estado de Strings, criando tokens de Cadeia de Caracteres,
+        Estado de Strings, criando tokens de Cadeia de Caracteres,
         retornando para o estado inicial pós-identificação de token.
 
         Returns:
@@ -182,7 +182,7 @@ class GenerateTokens():
     
     def commentState(self):
         """
-        Representa o estado de Comentários, criando tokens de comentários,
+        Estado de Comentários, criando tokens de comentários,
         retornando para o estado inicial pós-identificação de token.
 
         Returns:
@@ -222,7 +222,7 @@ class GenerateTokens():
             
     def delimiterState(self):
         """
-        Representa o estado de Delimitadores, criando tokens de delimitadores,
+        Estado de Delimitadores, criando tokens de delimitadores,
         retornando para o estado inicial pós-identificação de token.
 
         Returns:
@@ -234,7 +234,7 @@ class GenerateTokens():
 
     def opaState(self):
         """
-        Representa o estado de Operador Aritmético, criando tokens de OP. Aritmético,
+        Estado de Operador Aritmético, criando tokens de OP. Aritmético,
         retornando para o estado inicial pós-identificação de token.
 
         Returns:
@@ -255,7 +255,7 @@ class GenerateTokens():
 
     def oprState(self):
         """
-        Representa o estado de Operador Relacional, criando tokens de OP. Relacional,
+        Estado de Operador Relacional, criando tokens de OP. Relacional,
         retornando para o estado inicial pós-identificação de token.
 
         Returns:
@@ -275,7 +275,7 @@ class GenerateTokens():
 
     def oplState(self):
         """
-        Representa o estado de Operador Lógico, criando tokens de OP. Lógico,
+        Estado de Operador Lógico, criando tokens de OP. Lógico,
         retornando para o estado inicial pós-identificação de token.
 
         Returns:
@@ -291,8 +291,8 @@ class GenerateTokens():
 
     def isAscii(self, char) -> bool:
         """
-        Verifica se o caractere está presente no intervalo do alfabeto aceito para
-        o compilador
+        Verifica se o caractere está presente no intervalo do alfabeto aceito pelo
+        Analisador Léxico
 
         Returns:
         32 <= ord(char) <= 126
@@ -301,6 +301,7 @@ class GenerateTokens():
 
     def getErrorTokens(self) -> list:
         '''
+        Retorna a lista de tokens de erro
         Returns:
         self.error_tokens: Lista de Error_Tokens
         '''
