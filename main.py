@@ -2,7 +2,7 @@ import os
 from generate_tokens import GenerateTokens
 files = os.listdir("./input/")
 for file in files:
-    # Abrindo arquivo de entrada e criando arquivo de saída
+    # Seleciona todos os arquivos de entrada e, para cada um deles, gera um arquivo de saída
     pathName = open(f"./input/{file}", "r")
     codigoFonte = pathName.read()
     out = open("./output/"+file.replace("entrada", "saida"), "w")
@@ -12,7 +12,7 @@ for file in files:
     tokens = gtokens.initialState()
     errors = gtokens.getErrorTokens()
 
-    # Escrevendo no arquivo
+    # Escrevendo no arquivo de saída
     for token in tokens:
         out.write(str(token) + "\n")
     out.write("\n")
