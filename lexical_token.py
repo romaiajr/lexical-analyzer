@@ -15,8 +15,16 @@ OP_ERROR = "OpMF" # Operador Mal Formado
 OUT_ASCII_ERROR = "CNPA" # Caracter Não Pertence ao Alfabeto
 
 class Token():
-    
-    def __init__(self,type, lexema, line):
+    '''
+    Classe que representa os Tokens
+    '''
+    def __init__(self,type:str, lexema:str, line:int):
+        '''
+        Params:
+        type: Tipo de Token
+        lexema: Lexema do Token
+        line: Linha em que o lexema começa
+        '''
         self.type = type
         self.lexema = lexema
         self.line = line
@@ -29,8 +37,16 @@ class Token():
         
     
 class Error_Token(Token):
-
+    '''
+    Classe que representa os Tokens de erros
+    '''
     def __init__(self,type, lexema, line):
+        '''
+        Params:
+        type: Tipo de Token
+        lexema: Lexema do Token
+        line: Linha em que o lexema começa
+        '''
         self.type = type
         self.lexema = lexema
         self.line = line

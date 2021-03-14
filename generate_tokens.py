@@ -2,7 +2,9 @@ from lexical_token import *
 from iterator import MyIterator
 
 class GenerateTokens():
-    
+    '''
+    Classe responsável por criar os tokens
+    '''
     reservedWords = {"var", "const", "typedef", "struct", "extends", "procedure",
     "function", "start", "return", "if", "else", "then", "while", "read","print", "int",
     "real", "boolean", "string", "true", "false",
@@ -12,13 +14,21 @@ class GenerateTokens():
     operadoresRelacionais = {"==","!=",">",">=","<","<=","="}
     operadoresLogicos = {"&&","||","!"}
     
-    def __init__(self, whole_file):
+    def __init__(self, whole_file:str):
+        '''
+        Construtor da classe GenerateTokens 
+        whole_file: Conteúdo do arquivo lido
+        '''
         self.tokens, self.error_tokens, self.symbols_table = [],[],[]
         self.line = 1
         self.lexema = ''
         self.itr = MyIterator(whole_file)
             
-    def initialState(self): #NOTE Funcionando
+    def initialState(self) -> list:
+        '''
+        Representa o estado inicial do autômato.
+        Analisa o tipo do caractere atual e chama o próximo estado equivalente.
+        '''
         self.lexema = ''
         if self.itr.cur == None:
             return self.tokens
@@ -39,8 +49,17 @@ class GenerateTokens():
             self.itr.next()
             return self.initialState()
             
-    def ideState(self): #NOTE Funcionando
-        while self.itr.cur.isidentifier() or self.itr.cur.isnumeric() or self.itr.cur == "_":
+    def ideState(self):
+        '''
+        Representa o estado de Identificadores, responsável por criar 
+        tokens de identificadores e palavras reservadas, retornando para o estado
+        inicial pós-identificação de token
+
+
+        Returns: 
+        initialState(): Estado Inicial
+        '''
+        while (self.itr.cur.isidentifier() or self.itr.cur.isnumeric() or self.itr.cur == "_") and self.isAscii(self.itr.cur):
             self.lexema+=self.itr.cur
             self.itr.next()
             if self.itr.cur == None:
@@ -53,7 +72,18 @@ class GenerateTokens():
             self.tokens.append(Token(ID_TOKEN, self.lexema, self.line))
         return self.initialState()                                         
 
-    def numberStateA(self): #NOTE Funcionando
+    def numberStateA(self):
+        '''
+        Representa o estado A de Números, responsável por criar 
+        tokens de números. Caso um "." seja encontrado
+        ocorrerá uma transição para o estado B, se não, retornará o estado inicial
+        pós-identificação de token
+
+
+        Returns: 
+        numberStateB(): Estado B de Números
+        initialState(): Estado Inicial
+        '''
         while self.itr.cur.isnumeric():
             self.lexema+=self.itr.cur
             self.itr.next()
@@ -66,7 +96,15 @@ class GenerateTokens():
             self.tokens.append(Token(NUMBER_TOKEN, self.lexema, self.line))
             return self.initialState()
 
-    def numberStateB(self): #NOTE Funcionando
+    def numberStateB(self):
+        '''
+        Representa o estado B de Números, responsável por criar tokens de números,
+        retornando para o estado inicial pós-identificação de token.
+
+
+        Returns: 
+        initialState(): Estado Inicial
+        '''
         self.itr.next()
         if self.itr.cur.isnumeric():
             while self.itr.cur.isnumeric():
@@ -79,7 +117,21 @@ class GenerateTokens():
             self.error_tokens.append(Error_Token(NUMBER_ERROR, self.lexema, self.line))
         return self.initialState()
 
-    def symbolState(self): #NOTE Funcionando
+    def symbolState(self):
+        '''
+        Representa o estado de Símbolos, responsável por criar transições para
+        os estados equivalentes a cada símbolo. Retornará ao estado inicial Caso
+        o símbolo não corresponda a nenhum dos estados
+
+        Returns:
+        stringState(): Estado de Strings
+        commentState(): Estado de Comentários
+        delimiterState(): Estado de Delimitadores
+        opaState(): Estado de Operadores Aritméticos
+        oprState(): Estado de Operadores Relacionais
+        oplState(): Estado de Operadores Lógicos
+        initialState(): Estado Inicial
+        '''
         if self.itr.cur == "\"":
             self.lexema += self.itr.cur
             return self.stringState()  
@@ -98,16 +150,29 @@ class GenerateTokens():
             self.itr.next()
         return self.initialState()
 
-    def stringState(self): #NOTE Funcionando
+    def stringState(self):
+        """
+        Representa o estado de Strings, criando tokens de Cadeia de Caracteres,
+        retornando para o estado inicial pós-identificação de token.
+
+        Returns:
+        initialState(): Estado Inicial
+        """
+        contain_no_ascii = False
         self.itr.next()
         while self.itr.cur != "\"" and self.itr.cur != "\n":
             self.lexema+=self.itr.cur
             self.itr.next()
             if self.itr.cur == None:
                 break
+            elif not self.isAscii(self.itr.cur):
+                contain_no_ascii = True
         if self.itr.cur == "\"":
             self.lexema+=self.itr.cur
-            self.tokens.append(Token(STRING_TOKEN, self.lexema, self.line))
+            if contain_no_ascii:
+                self.error_tokens.append(Error_Token(STRING_ERROR, self.lexema, self.line))
+            else:
+                self.tokens.append(Token(STRING_TOKEN, self.lexema, self.line))
             self.itr.next()
         else:
             self.error_tokens.append(Error_Token(STRING_ERROR, self.lexema, self.line))
@@ -115,7 +180,14 @@ class GenerateTokens():
             self.itr.next()
         return self.initialState()
     
-    def commentState(self): #NOTE Funcionando
+    def commentState(self):
+        """
+        Representa o estado de Comentários, criando tokens de comentários,
+        retornando para o estado inicial pós-identificação de token.
+
+        Returns:
+        initialState(): Estado Inicial
+        """
         self.itr.next()
         if self.itr.cur == "/":
             while self.itr.cur != "\n":
@@ -148,12 +220,26 @@ class GenerateTokens():
             self.tokens.append(Token(OP_A_TOKEN, self.itr.prv, self.line))
             return self.initialState()
             
-    def delimiterState(self): #NOTE Funcionando
+    def delimiterState(self):
+        """
+        Representa o estado de Delimitadores, criando tokens de delimitadores,
+        retornando para o estado inicial pós-identificação de token.
+
+        Returns:
+        initialState(): Estado Inicial
+        """
         self.tokens.append(Token(DELIMITER_TOKEN, self.itr.cur, self.line))
         self.itr.next()
         return self.initialState()
 
-    def opaState(self): # NOTE Funcionando Operador Aritmético
+    def opaState(self):
+        """
+        Representa o estado de Operador Aritmético, criando tokens de OP. Aritmético,
+        retornando para o estado inicial pós-identificação de token.
+
+        Returns:
+        initialState(): Estado Inicial
+        """
         if self.itr.cur in {"*","/"}: #REVIEW / já é pego no comentário
             self.tokens.append(Token(OP_A_TOKEN, self.itr.cur, self.line))
             self.itr.next()
@@ -168,6 +254,13 @@ class GenerateTokens():
         return self.initialState()
 
     def oprState(self):
+        """
+        Representa o estado de Operador Relacional, criando tokens de OP. Relacional,
+        retornando para o estado inicial pós-identificação de token.
+
+        Returns:
+        initialState(): Estado Inicial
+        """
         if self.itr.nxt == "=":
             self.tokens.append(Token(OP_R_TOKEN, self.itr.cur + self.itr.nxt, self.line))
             self.itr.next()
@@ -181,6 +274,13 @@ class GenerateTokens():
         return self.initialState()
 
     def oplState(self):
+        """
+        Representa o estado de Operador Lógico, criando tokens de OP. Lógico,
+        retornando para o estado inicial pós-identificação de token.
+
+        Returns:
+        initialState(): Estado Inicial
+        """
         if self.itr.cur == self.itr.nxt:
             self.tokens.append(Token(OP_L_TOKEN, self.itr.cur + self.itr.nxt, self.line))
             self.itr.next()
@@ -189,16 +289,28 @@ class GenerateTokens():
         self.itr.next()
         return self.initialState()
 
-    def isAscii(self, char):
+    def isAscii(self, char) -> bool:
+        """
+        Verifica se o caractere está presente no intervalo do alfabeto aceito para
+        o compilador
+
+        Returns:
+        32 <= ord(char) <= 126
+        """
         return 32 <= ord(char) <= 126
 
-    def getErrorTokens(self):
+    def getErrorTokens(self) -> list:
+        '''
+        Returns:
+        self.error_tokens: Lista de Error_Tokens
+        '''
         return self.error_tokens
 
 if __name__ == "__main__":
-    gt = GenerateTokens("10ü")
-    item = gt.initialState()
-    for i in gt.initialState():
-        print(i)
-    for i in gt.getErrorTokens():
-        print(i)
+    # gt = GenerateTokens("a")
+    # item = gt.initialState()
+    # for i in gt.initialState():
+    #     print(i)
+    # for i in gt.getErrorTokens():
+    #     print(i)
+    print(32<= ord('ç') <=126)
