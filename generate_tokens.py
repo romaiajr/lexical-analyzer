@@ -14,12 +14,9 @@ class GenerateTokens():
     
     def __init__(self, whole_file):
         self.tokens, self.error_tokens, self.symbols_table = [],[],[]
-        self.line = 0
+        self.line = 1
         self.lexema = ''
         self.itr = MyIterator(whole_file)
-        
-    # def __iter__(self):
-    #     return self.itr
             
     def initialState(self): #NOTE Funcionando
         self.lexema = ''
@@ -38,7 +35,8 @@ class GenerateTokens():
             else:
                 return self.symbolState()
         else:
-            self.error_tokens.append(Error_Token(OUT_ASCII_ERROR, self.itr.cur, line))
+            self.error_tokens.append(Error_Token(OUT_ASCII_ERROR, self.itr.cur, self.line))
+            self.itr.next()
             return self.initialState()
             
     def ideState(self): #NOTE Funcionando
@@ -87,7 +85,16 @@ class GenerateTokens():
             return self.stringState()  
         elif self.itr.cur == "/":
             return self.commentState()
+        elif self.delimitadores.__contains__(self.itr.cur):
+            return self.delimiterState()
+        elif self.operadoresAritmeticos.__contains__(self.itr.cur):
+            return self.opaState()
+        elif self.itr.cur in {"=", "!", ">", "<"}:
+            return self.oprState()
+        elif self.itr.cur in {"&","|"}: # OP.
+            return self.oplState()
         else:
+            self.error_tokens.append(Error_Token(SYMBOL_ERROR, self.itr.cur, self.line))
             self.itr.next()
         return self.initialState()
 
@@ -105,6 +112,7 @@ class GenerateTokens():
         else:
             self.error_tokens.append(Error_Token(STRING_ERROR, self.lexema, self.line))
             self.line+=1
+            self.itr.next()
         return self.initialState()
     
     def commentState(self): #NOTE Funcionando
@@ -116,26 +124,70 @@ class GenerateTokens():
                     break
             if self.itr.cur == "\n":
                 self.line+=1
+                self.itr.next()
             return self.initialState()
         elif self.itr.cur == "*":
+            skipped_lines = 0
             self.lexema += self.itr.prv + self.itr.cur
             self.itr.next()
             while self.itr.cur != "*" and self.itr.nxt != "/":
-                self.lexema += self.itr.cur
                 if self.itr.cur == "\n":
-                    self.line+=1
+                    skipped_lines+=1
+                else:
+                    self.lexema += self.itr.cur
                 self.itr.next()
-                if self.itr.nxt == None:
+                if self.itr.cur == None:
                     break
             if self.itr.nxt == None:
                 self.error_tokens.append(Error_Token(COMMENT_ERROR, self.lexema, self.line))
             self.itr.next() # Para pular o */ final
-            self.itr.next()     
+            self.itr.next()
+            self.line += skipped_lines     
+            return self.initialState()
+        else:
+            self.tokens.append(Token(OP_A_TOKEN, self.itr.prv, self.line))
             return self.initialState()
             
+    def delimiterState(self): #NOTE Funcionando
+        self.tokens.append(Token(DELIMITER_TOKEN, self.itr.cur, self.line))
+        self.itr.next()
+        return self.initialState()
 
-                    
-                    
+    def opaState(self): # NOTE Funcionando Operador Aritmético
+        if self.itr.cur in {"*","/"}: #REVIEW / já é pego no comentário
+            self.tokens.append(Token(OP_A_TOKEN, self.itr.cur, self.line))
+            self.itr.next()
+        else:
+            if self.itr.cur == self.itr.nxt:
+                self.tokens.append(Token(OP_A_TOKEN, self.itr.cur + self.itr.nxt, self.line))
+                self.itr.next() # Pulando os 2 elementos de ++ ou -- e indo para o próximo
+                self.itr.next()
+            else:
+                self.tokens.append(Token(OP_A_TOKEN, self.itr.cur, self.line))
+                self.itr.next()
+        return self.initialState()
+
+    def oprState(self):
+        if self.itr.nxt == "=":
+            self.tokens.append(Token(OP_R_TOKEN, self.itr.cur + self.itr.nxt, self.line))
+            self.itr.next()
+            self.itr.next()
+        else:
+            if self.itr.cur == "!":
+                self.tokens.append(Token(OP_L_TOKEN, self.itr.cur, self.line))
+            else:
+                self.tokens.append(Token(OP_R_TOKEN, self.itr.cur, self.line))
+            self.itr.next()
+        return self.initialState()
+
+    def oplState(self):
+        if self.itr.cur == self.itr.nxt:
+            self.tokens.append(Token(OP_L_TOKEN, self.itr.cur + self.itr.nxt, self.line))
+            self.itr.next()
+        else:
+            self.error_tokens.append(Error_Token(OP_ERROR, self.itr.cur, self.line))
+        self.itr.next()
+        return self.initialState()
 
     def isAscii(self, char):
         return 32 <= ord(char) <= 126
@@ -144,11 +196,9 @@ class GenerateTokens():
         return self.error_tokens
 
 if __name__ == "__main__":
-    gt = GenerateTokens("/*comentario\n teste ")
+    gt = GenerateTokens("10ü")
     item = gt.initialState()
-    for i in item:
+    for i in gt.initialState():
         print(i)
     for i in gt.getErrorTokens():
         print(i)
-    # for item in previous_current_next("Roberto"):
-    #     print(item)
