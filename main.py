@@ -11,11 +11,12 @@ for file in files:
 
     # Gerando e armazenando tokens e erros
     gtokens = GenerateTokens(codigoFonte)
-    tokens = gtokens.initialState()
+    gtokens.initialState() #Tendo que chamar o initialState() para depois ter acesso ao getTokens
+    tokens = gtokens.getTokens()
     errors = gtokens.getErrorTokens()
 
     # Escrevendo no arquivo de saída
-    for token in gtokens.initialState():
+    for token in tokens:
         out.write(str(token) + "\n")
     out.write("\n")
     for error in errors:
