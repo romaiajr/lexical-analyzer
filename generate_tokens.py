@@ -160,17 +160,22 @@ class GenerateTokens():
         """
         contain_no_ascii = False
         self.itr.next()
-        while self.itr.cur != "\"" and self.itr.cur != "\n":
+        while self.itr.cur not in {'"',"\n",None}:
             self.lexema+=self.itr.cur
             self.itr.next()
             if self.itr.cur == None:
                 break
             elif not self.isAscii(self.itr.cur):
                 contain_no_ascii = True
+            elif self.itr.cur == "\\" and self.itr.nxt == '"':
+                self.lexema+=self.itr.cur + self.itr.nxt
+                self.itr.next()
+                self.itr.next()
+
         if self.itr.cur == "\"":
             self.lexema+=self.itr.cur
             if contain_no_ascii:
-                self.error_tokens.append(Error_Token(STRING_ERROR, self.lexema, self.line))
+                self.error_tokens.append(Error_Token(STRING_NO_ASCII, self.lexema, self.line))
             else:
                 self.tokens.append(Token(STRING_TOKEN, self.lexema, self.line))
             self.itr.next()
@@ -308,10 +313,9 @@ class GenerateTokens():
         return self.error_tokens
 
 if __name__ == "__main__":
-    # gt = GenerateTokens("a")
-    # item = gt.initialState()
-    # for i in gt.initialState():
-    #     print(i)
-    # for i in gt.getErrorTokens():
-    #     print(i)
-    print(32<= ord('ç') <=126)
+    gt = GenerateTokens('"teste \\""')
+    item = gt.initialState()
+    for i in gt.initialState():
+        print(i)
+    for i in gt.getErrorTokens():
+        print(i)
