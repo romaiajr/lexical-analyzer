@@ -1,4 +1,6 @@
 import os
+import sys
+sys.setrecursionlimit(20000)
 from generate_tokens import GenerateTokens
 files = os.listdir("./input/")
 for file in files:
@@ -13,7 +15,7 @@ for file in files:
     errors = gtokens.getErrorTokens()
 
     # Escrevendo no arquivo de saída
-    for token in tokens:
+    for token in gtokens.initialState():
         out.write(str(token) + "\n")
     out.write("\n")
     for error in errors:

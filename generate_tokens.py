@@ -31,23 +31,23 @@ class GenerateTokens():
         '''
         self.lexema = ''
         if self.itr.cur == None:
-            return self.tokens
+            return self.getTokens()
         elif self.itr.cur.isspace():
             if self.itr.cur == "\n":
                 self.line+=1
             self.itr.next()
-            return self.initialState() 
+            self.initialState() 
         elif self.isAscii(self.itr.cur):
             if self.itr.cur.isidentifier():
-                return self.ideState()
+                self.ideState()
             elif self.itr.cur.isnumeric():
-                return self.numberState()
+                self.numberState()
             else:
-                return self.symbolState()
+                self.symbolState()
         else:
             self.error_tokens.append(Error_Token(OUT_ASCII_ERROR, self.itr.cur, self.line))
             self.itr.next()
-            return self.initialState()
+            self.initialState()
             
     def ideState(self):
         '''
@@ -70,7 +70,7 @@ class GenerateTokens():
             self.tokens.append(Token(RW_TOKEN, self.lexema, self.line))
         else: # Se não for uma palavra reservada, será um identificador
             self.tokens.append(Token(ID_TOKEN, self.lexema, self.line))
-        return self.initialState()                                         
+        self.initialState()                                         
 
     def numberState(self):
         '''
@@ -94,7 +94,7 @@ class GenerateTokens():
             return self.floatState()
         else:
             self.tokens.append(Token(NUMBER_TOKEN, self.lexema, self.line))
-            return self.initialState()
+        self.initialState()
 
     def floatState(self):
         '''
@@ -115,7 +115,7 @@ class GenerateTokens():
             self.tokens.append(Token(NUMBER_TOKEN, self.lexema, self.line))
         else:
             self.error_tokens.append(Error_Token(NUMBER_ERROR, self.lexema, self.line))
-        return self.initialState()
+        self.initialState()
 
     def symbolState(self):
         '''
@@ -148,7 +148,7 @@ class GenerateTokens():
         else:
             self.error_tokens.append(Error_Token(SYMBOL_ERROR, self.itr.cur, self.line))
             self.itr.next()
-        return self.initialState()
+        self.initialState()
 
     def stringState(self):
         """
@@ -183,7 +183,7 @@ class GenerateTokens():
             self.error_tokens.append(Error_Token(STRING_ERROR, self.lexema, self.line))
             self.line+=1
             self.itr.next()
-        return self.initialState()
+        self.initialState()
     
     def commentState(self):
         """
@@ -202,7 +202,6 @@ class GenerateTokens():
             if self.itr.cur == "\n":
                 self.line+=1
                 self.itr.next()
-            return self.initialState()
         elif self.itr.cur == "*":
             skipped_lines = 0
             self.lexema += self.itr.prv + self.itr.cur
@@ -220,10 +219,9 @@ class GenerateTokens():
             self.itr.next() # Para pular o */ final
             self.itr.next()
             self.line += skipped_lines     
-            return self.initialState()
         else:
             self.tokens.append(Token(OP_A_TOKEN, self.itr.prv, self.line))
-            return self.initialState()
+        self.initialState()
             
     def delimiterState(self):
         """
@@ -235,7 +233,7 @@ class GenerateTokens():
         """
         self.tokens.append(Token(DELIMITER_TOKEN, self.itr.cur, self.line))
         self.itr.next()
-        return self.initialState()
+        self.initialState()
 
     def opaState(self):
         """
@@ -256,7 +254,7 @@ class GenerateTokens():
             else:
                 self.tokens.append(Token(OP_A_TOKEN, self.itr.cur, self.line))
                 self.itr.next()
-        return self.initialState()
+        self.initialState()
 
     def oprState(self):
         """
@@ -276,7 +274,7 @@ class GenerateTokens():
             else:
                 self.tokens.append(Token(OP_R_TOKEN, self.itr.cur, self.line))
             self.itr.next()
-        return self.initialState()
+        self.initialState()
 
     def oplState(self):
         """
@@ -292,7 +290,7 @@ class GenerateTokens():
         else:
             self.error_tokens.append(Error_Token(OP_ERROR, self.itr.cur, self.line))
         self.itr.next()
-        return self.initialState()
+        self.initialState()
 
     def isAscii(self, char) -> bool:
         """
@@ -312,10 +310,39 @@ class GenerateTokens():
         '''
         return self.error_tokens
 
+    def getTokens(self) -> list:
+        return self.tokens
+
 if __name__ == "__main__":
-    gt = GenerateTokens('"teste \\""')
-    item = gt.initialState()
-    for i in gt.initialState():
+    gt = GenerateTokens('''/* 
+	teste08 - sem erros
+*/
+$ & £
+"TESTE STRING SEM FECHAR $
+const int MAX = 10ü, MAX2 = 50..3;
+	
+string Mensagem_testeü = "Hello world $ ü";
+
+procedure start {  // comeca aqui o programa principal 
+
+	int idade ü; 
+	real salario;
+	string nome;
+
+	print("Digite o nome");
+	read(nome);
+	print("Digite a idade");A
+	read(idade);
+	
+	if (idade >= 150) print("pode aposentar kkkk");
+	else {
+		print("vai trabalhar");
+		salario = salario; // hehehe
+	}	
+ 
+} // fim start''')
+    items = gt.initialState()
+    for i in items:
         print(i)
     for i in gt.getErrorTokens():
         print(i)

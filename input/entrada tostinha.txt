@@ -1,7 +1,6 @@
 /* 
 	teste08 - sem erros
 */
-$ & £
 "TESTE STRING SEM FECHAR $
 const int MAX = 10ü, MAX2 = 50..3;
 	
@@ -15,7 +14,7 @@ procedure start {  // comeca aqui o programa principal
 
 	print("Digite o nome");
 	read(nome);
-	print("Digite a idade");
+	print("Digite a idade");A
 	read(idade);
 	
 	if (idade >= 150) print("pode aposentar kkkk");
