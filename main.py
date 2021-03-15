@@ -1,6 +1,4 @@
 import os
-import sys
-sys.setrecursionlimit(20000)
 from generate_tokens import GenerateTokens
 files = os.listdir("./input/")
 for file in files:
@@ -11,8 +9,7 @@ for file in files:
 
     # Gerando e armazenando tokens e erros
     gtokens = GenerateTokens(codigoFonte)
-    gtokens.initialState() #Tendo que chamar o initialState() para depois ter acesso ao getTokens
-    tokens = gtokens.getTokens()
+    tokens = gtokens.initialState()
     errors = gtokens.getErrorTokens()
 
     # Escrevendo no arquivo de saída
@@ -21,6 +18,3 @@ for file in files:
     out.write("\n")
     for error in errors:
         out.write(str(error) + "\n")
-
-# Item fora do alfabeto sendo pego na string, como fazer? #REVIEW   VERIFICAR DENTRO DO WHILE
-# string n pode fechar com \" #REVIEW
