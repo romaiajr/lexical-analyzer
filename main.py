@@ -25,14 +25,15 @@ if os.path.isdir(path):
                         out.write(str(error) + "\n")
                     
                     if len(errors) > 0:
-                        print (f"SUCESSO: Arquivo {file} foi lido com sucesso! Foram encontrados {len(errors)} erros.")
+                        print (f"ERRO: Encontrados {len(errors)} erros durante a leitura do arquivo {file}")
                     else:
-                        print(f"SUCESSO: Arquivo {file} foi lido com sucesso! Não foram encontrados erros.")
+                        out.write(f"SUCESSO: O arquivo {file} foi lido com sucesso! Não foram encontrados erros.")
+                        print(f"SUCESSO: O arquivo {file} foi lido com sucesso! Não foram encontrados erros.")
                 else:
                     print(f"ALERTA: O arquivo {file} foi ignorado. Nome do arquivo não corresponde ao padrão estabelecido.")
             else:
                 print(f"ERRO: Formato do arquivo {file} não é suportado.")
     else:
-        print(f"ERRO: Não foram encontrado arquivos no diretório {path}")
+        print(f"ERRO: Não foram encontrados arquivos no diretório {path}")
 else:
     print(f"ERRO: Diretório {path} não encontrado")
