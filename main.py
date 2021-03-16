@@ -8,7 +8,7 @@ if os.path.isdir(path):
             if file.endswith(".txt"):
                 if file.startswith("entrada"):
                     # Seleciona todos os arquivos de entrada e, para cada um deles, gera um arquivo de saída
-                    pathName = open(f"{path}{file}", "r")
+                    pathName = open(f"{path}{file}", "r",encoding="utf-8")
                     codigoFonte = pathName.read()
                     out = open("./output/"+file.replace("entrada", "saida"), "w")
 
