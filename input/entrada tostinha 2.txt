@@ -2,7 +2,7 @@ exemplo teste; // codigo exemplo
 
 real f = 3.5;
 
-string msg = "teste
+string _msg = "teste
 
 if ( f >= 10) && (f < ) 
 	print("mensagem );

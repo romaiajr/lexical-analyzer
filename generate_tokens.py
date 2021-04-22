@@ -42,10 +42,12 @@ class GenerateTokens():
                     if self.itr.cur == "\n":
                         self.line+=1
                     self.itr.next()
-                    # self.initialState() 
                 elif self.isAscii(self.itr.cur):
                     if self.itr.cur.isidentifier():
-                        token = self.ideState()
+                        if self.itr.cur == "_":
+                            token = self.symbolState()
+                        else:
+                            token = self.ideState()
                     elif self.itr.cur.isnumeric():
                         token = self.numberState()
                     else:
@@ -318,17 +320,7 @@ class GenerateTokens():
         return self.tokens
 
 if __name__ == "__main__":
-    gt = GenerateTokens('''exemplo teste; // codigo exemplo
-
-real f = 3.5;
-
-string msg = "teste
-
-if ( f >= 10) && (f < ) 
-	print("mensagem );
-@	
-/* exa869 mi processadores de 
-linguagem de programacao''')
+    gt = GenerateTokens('''string _msg = "teste''')
     items = gt.initialState()
     for i in items:
         print(i)
