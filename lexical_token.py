@@ -35,8 +35,16 @@ class Token():
             return f"0{self.line} {self.type} {self.lexema}"
         else:
             return f"{self.line} {self.type} {self.lexema}"
-        
+
+    def getLexema(self):
+        return self.lexema
     
+    def getLine(self):
+        return self.line
+
+    def getType(self):
+        return self.type
+         
 class Error_Token(Token):
     '''
     Classe que representa os Tokens de erros

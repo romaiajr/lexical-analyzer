@@ -60,7 +60,7 @@ class MyIterator():
         Método para mover o iterador para o próximo item
         '''
         try:
-            return str(next(self.__iterator))
+            return (next(self.__iterator))
         except StopIteration:
             return None
 
