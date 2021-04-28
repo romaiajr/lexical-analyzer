@@ -22,11 +22,11 @@ class Parser():
 
     def initProduction(self) -> None:
         if (self.itr.cur.lexema) == "procedure": 
-            self.itr.next()
+            self.nextToken()
             if self.itr.cur.lexema == "start":
-                self.itr.next()
+                self.nextToken()
                 if self.itr.cur.lexema == "{":
-                    self.itr.next()
+                    self.nextToken()
                     self.startProduction()
                 else:
                     self.sintaxErrors.append(sintaxError(self.itr.cur, "{"))
@@ -36,65 +36,98 @@ class Parser():
             self.sintaxErrors.append(sintaxError(self.itr.cur, "procedure"))
 
     def startProduction(self) -> None:
-        # print("startProduction")
-        self.programProduction()
+        self.statementProduction()
         if self.itr.cur != None:
             if self.itr.cur.lexema == "}":
-                self.itr.next()
+                self.nextToken()
                 return
             else:
+                self.nextToken()
                 self.startProduction()
 
-    def programProduction(self) -> None:
-        # print("programProduction")
-        self.statementProduction()
+    # def programProduction(self) -> None:
+    #     self.statementProduction()
 
     def statementProduction(self) -> None:
-        # print("statementProduction")
-        if self.itr.cur.lexema == "typedef":
-            self.itr.next()
-            if self.itr.cur.lexema == "struct":
-                self.itr.next()
-                self.structProduction()
-            else:
-                self.sintaxErrors.append(sintaxError(self.itr.cur, "struct"))
-        else:
-            self.itr.next()
+        if self.itr.cur.lexema == "typedef": # STRUCT
+            self.nextToken()
+            self.structProduction()
+        elif self.itr.cur.lexema == "while": # WHILE
+            self.nextToken()
+            self.whileProduction()
+        elif self.itr.cur.lexema == "if": # IF - THEN - ELSE
+            self.nextToken()
+            self.ifProduction()
+        elif self.itr.cur.lexema == "print": # PRINT
+            self.nextToken()
+            self.printProduction()
+        elif self.itr.cur.lexema == "function": # FUNCTION or PROCEDURE DECL
+            self.nextToken()
+            self.functionDeclProduction()
+        elif self.itr.cur.type == "IDE": # VAR ATR or FUNCTION CALL
+            self.nextToken()
+        elif self.itr.cur.lexema == "const" or self.itr.cur.lexema == "var": # VAR DECL
+            self.nextToken()
+            self.varProduction()
+        elif self.itr.cur.lexema == "}":
+            self.nextToken()
+            return
 
     def structProduction(self) -> None:
-        if self.itr.cur.lexema == "{":
-            self.itr.next()
-            self.varProduction()
-        else:
-            self.sintaxErrors.append(sintaxError(self.itr.cur, "{"))
-    
-    def varProduction(self) -> None:
-        if self.itr.cur.lexema == "var" or self.itr.cur.lexema == "const":
-            self.itr.next()
-            self.varDeclaration()
-        else:
-            self.sintaxErrors.append(sintaxError(self.itr.cur, "var or const"))
-
-
-    def varDeclaration(self) -> None:
-        if self.itr.cur.lexema == "{":
-            self.itr.next()
-            if self.type.__contains__(self.itr.cur.lexema):
-                self.itr.next()
-                self.ideVar()
+        if self.itr.cur.lexema == "struct":
+            self.nextToken()
+            if self.itr.cur.lexema == "{":
+                self.nextToken()
+                self.varProduction()
                 if self.itr.cur.lexema == "}":
-                    self.itr.next()
+                    self.nextToken()
                     if self.itr.cur.type == "IDE":
-                        self.itr.next()
+                        self.nextToken()
                         if self.itr.cur.lexema == ";":
-                            self.itr.next()
-                            return
+                            self.nextToken()
+                            self.statementProduction()
                         else:
                             self.sintaxErrors.append(sintaxError(self.itr.cur, ";"))
                     else:
                         self.sintaxErrors.append(sintaxError(self.itr.cur, "IDE"))
                 else:
                     self.sintaxErrors.append(sintaxError(self.itr.cur, "}"))
+            else:
+                self.sintaxErrors.append(sintaxError(self.itr.cur, "{"))
+        else:
+            self.sintaxErrors.append(sintaxError(self.itr.cur, "struct"))
+    
+    def whileProduction(self) -> None:
+        if self.itr.cur.lexema == "(":
+            self.nextToken()
+            #self.expressionProduction()
+            if self.itr.cur.lexema == ")":
+                self.nextToken()
+                self.statementProduction()
+            else:
+                self.sintaxErrors.append(sintaxError(self.itr.cur, ")"))
+        else:
+            self.sintaxErrors.append(sintaxError(self.itr.cur, "("))
+       
+    
+    def varProduction(self) -> None:
+        if self.itr.cur.lexema == "const" or self.itr.cur.lexema == "var":
+            self.nextToken()
+            self.varDeclaration()
+        else:
+            self.sintaxErrors.append(sintaxError(self.itr.cur, "const ou var"))
+
+    def varDeclaration(self) -> None:
+        if self.itr.cur.lexema == "{":
+            self.nextToken()
+            if self.type.__contains__(self.itr.cur.lexema):
+                while self.type.__contains__(self.itr.cur.lexema):
+                    self.nextToken()
+                    self.ideVar()
+                    if self.itr.cur.lexema == "}":
+                        self.nextToken()
+                        if self.itr.cur.lexema == "const" or self.itr.cur.lexema == "var":
+                            self.varProduction()
             else:
                 self.sintaxErrors.append(sintaxError(self.itr.cur, str(self.type)))
         else:
@@ -103,12 +136,12 @@ class Parser():
 
     def ideVar(self) -> None:
         if self.itr.cur.type == "IDE":
-            self.itr.next()
+            self.nextToken()
             if self.itr.cur.lexema == ",":
-                self.itr.next()
+                self.nextToken()
                 self.ideVar()
             elif self.itr.cur.lexema == ";":
-                self.itr.next()
+                self.nextToken()
                 return
             else:
                 self.sintaxErrors.append(sintaxError(self.itr.cur, ", ou ;"))
@@ -118,8 +151,19 @@ class Parser():
     def getSintaxErrors(self) -> list:
         return self.sintaxErrors
 
+    def nextToken(self) -> None:
+        self.sintaxErrors.append(self.itr.cur)
+        self.itr.next()
+
 if __name__ == "__main__":
-    codigoFonte = '''  procedure start { typedef struct { var { int roberto, daniel;} teste;  }} '''
+    codigoFonte = '''
+    procedure start { 
+        while()
+        typedef struct { 
+            var { int roberto, daniel; boolean teste;} 
+            const { int teste;} 
+        }teste;
+    } '''
     gtokens = GenerateTokens(codigoFonte)
     tokens = gtokens.initialState()
     sintaxParser = Parser(tokens)
