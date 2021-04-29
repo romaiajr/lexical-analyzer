@@ -4,13 +4,23 @@ from generate_tokens import GenerateTokens
 
 class Parser():
     type = {"int", "real", "string", "boolean"}
-    terminalSymbols = {';', '}'}
+    variable = {"const", "var"}
+    
 
     def __init__(self, tokens:list):
         self.tokens = tokens
         self.itr = MyIterator(tokens)
         self.current = 0
         self.sintaxErrors = []
+        self.statement_dict = {
+            "typedef": self.structProduction,
+            "while": self.whileProduction,
+            "if": self.ifProduction,
+            "print": self.printProduction,
+            "function": self.functionDeclProduction,
+            "var" or "const": self.varProduction,
+            "}": self.nextToken,
+        }
 
     def sintaxParser(self) -> list:
             try:
@@ -42,38 +52,18 @@ class Parser():
                 self.nextToken()
                 return
             else:
-                self.nextToken()
+                # self.nextToken()
                 self.startProduction()
 
-    # def programProduction(self) -> None:
-    #     self.statementProduction()
-
     def statementProduction(self) -> None:
-        if self.itr.cur.lexema == "typedef": # STRUCT
+        if self.itr.cur.type == "IDE":
             self.nextToken()
-            self.structProduction()
-        elif self.itr.cur.lexema == "while": # WHILE
-            self.nextToken()
-            self.whileProduction()
-        elif self.itr.cur.lexema == "if": # IF - THEN - ELSE
-            self.nextToken()
-            self.ifProduction()
-        elif self.itr.cur.lexema == "print": # PRINT
-            self.nextToken()
-            self.printProduction()
-        elif self.itr.cur.lexema == "function": # FUNCTION or PROCEDURE DECL
-            self.nextToken()
-            self.functionDeclProduction()
-        elif self.itr.cur.type == "IDE": # VAR ATR or FUNCTION CALL
-            self.nextToken()
-        elif self.itr.cur.lexema == "const" or self.itr.cur.lexema == "var": # VAR DECL
-            self.nextToken()
-            self.varProduction()
-        elif self.itr.cur.lexema == "}":
-            self.nextToken()
-            return
-
+        else:
+            statement = self.statement_dict[self.itr.cur.lexema]
+            statement()
+            
     def structProduction(self) -> None:
+        self.nextToken()
         if self.itr.cur.lexema == "struct":
             self.nextToken()
             if self.itr.cur.lexema == "{":
@@ -98,6 +88,7 @@ class Parser():
             self.sintaxErrors.append(sintaxError(self.itr.cur, "struct"))
     
     def whileProduction(self) -> None:
+        self.nextToken()
         if self.itr.cur.lexema == "(":
             self.nextToken()
             #self.expressionProduction()
@@ -111,7 +102,8 @@ class Parser():
        
     
     def varProduction(self) -> None:
-        if self.itr.cur.lexema == "const" or self.itr.cur.lexema == "var":
+        # self.nextToken()
+        if self.itr.cur.lexema in self.variable:
             self.nextToken()
             self.varDeclaration()
         else:
@@ -126,7 +118,7 @@ class Parser():
                     self.ideVar()
                     if self.itr.cur.lexema == "}":
                         self.nextToken()
-                        if self.itr.cur.lexema == "const" or self.itr.cur.lexema == "var":
+                        if self.itr.cur.lexema in self.variable:
                             self.varProduction()
             else:
                 self.sintaxErrors.append(sintaxError(self.itr.cur, str(self.type)))
@@ -154,6 +146,16 @@ class Parser():
     def nextToken(self) -> None:
         self.sintaxErrors.append(self.itr.cur)
         self.itr.next()
+
+    def ifProduction(self) -> None:
+        pass
+    
+    def printProduction(self) -> None:
+        pass
+
+    def functionDeclProduction(self) -> None:
+        pass
+
 
 if __name__ == "__main__":
     codigoFonte = '''
