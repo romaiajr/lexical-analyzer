@@ -1,13 +1,16 @@
+# faz o if else, criação de função
 from iterator import MyIterator
 from sintaxError import sintaxError
 from generate_tokens import GenerateTokens
 
+
 class Parser():
     type = {"int", "real", "string", "boolean"}
+    # Eu não sabia pra que servia esse Type ai de cima e usei uma cópia chamada typeOf
+    typeOf = {"int", "real", "string", "boolean"}
     variable = {"const", "var"}
-    
 
-    def __init__(self, tokens:list):
+    def __init__(self, tokens: list):
         self.tokens = tokens
         self.itr = MyIterator(tokens)
         self.current = 0
@@ -16,6 +19,7 @@ class Parser():
             "typedef": self.structProduction,
             "while": self.whileProduction,
             "if": self.ifProduction,
+            "else": self.elseProduction,
             "print": self.printProduction,
             "function": self.functionDeclProduction,
             "var" or "const": self.varProduction,
@@ -23,15 +27,15 @@ class Parser():
         }
 
     def sintaxParser(self) -> list:
-            try:
-                if self.itr.cur == None:
-                    return self.getSintaxErrors()
-                self.initProduction()
-            except StopIteration:
+        try:
+            if self.itr.cur == None:
                 return self.getSintaxErrors()
+            self.initProduction()
+        except StopIteration:
+            return self.getSintaxErrors()
 
     def initProduction(self) -> None:
-        if (self.itr.cur.lexema) == "procedure": 
+        if (self.itr.cur.lexema) == "procedure":
             self.nextToken()
             if self.itr.cur.lexema == "start":
                 self.nextToken()
@@ -61,7 +65,7 @@ class Parser():
         else:
             statement = self.statement_dict[self.itr.cur.lexema]
             statement()
-            
+
     def structProduction(self) -> None:
         self.nextToken()
         if self.itr.cur.lexema == "struct":
@@ -77,21 +81,23 @@ class Parser():
                             self.nextToken()
                             self.statementProduction()
                         else:
-                            self.sintaxErrors.append(sintaxError(self.itr.cur, ";"))
+                            self.sintaxErrors.append(
+                                sintaxError(self.itr.cur, ";"))
                     else:
-                        self.sintaxErrors.append(sintaxError(self.itr.cur, "IDE"))
+                        self.sintaxErrors.append(
+                            sintaxError(self.itr.cur, "IDE"))
                 else:
                     self.sintaxErrors.append(sintaxError(self.itr.cur, "}"))
             else:
                 self.sintaxErrors.append(sintaxError(self.itr.cur, "{"))
         else:
             self.sintaxErrors.append(sintaxError(self.itr.cur, "struct"))
-    
+
     def whileProduction(self) -> None:
         self.nextToken()
         if self.itr.cur.lexema == "(":
             self.nextToken()
-            #self.expressionProduction()
+            # self.expressionProduction()
             if self.itr.cur.lexema == ")":
                 self.nextToken()
                 self.statementProduction()
@@ -99,8 +105,7 @@ class Parser():
                 self.sintaxErrors.append(sintaxError(self.itr.cur, ")"))
         else:
             self.sintaxErrors.append(sintaxError(self.itr.cur, "("))
-       
-    
+
     def varProduction(self) -> None:
         # self.nextToken()
         if self.itr.cur.lexema in self.variable:
@@ -121,10 +126,10 @@ class Parser():
                         if self.itr.cur.lexema in self.variable:
                             self.varProduction()
             else:
-                self.sintaxErrors.append(sintaxError(self.itr.cur, str(self.type)))
+                self.sintaxErrors.append(
+                    sintaxError(self.itr.cur, str(self.type)))
         else:
             self.sintaxErrors.append(sintaxError(self.itr.cur, "{"))
-                
 
     def ideVar(self) -> None:
         if self.itr.cur.type == "IDE":
@@ -148,23 +153,63 @@ class Parser():
         self.itr.next()
 
     def ifProduction(self) -> None:
-        pass
-    
+        self.nextToken()
+        if self.itr.cur.lexema == "(":
+            self.nextToken()
+            if self.itr.cur.lexema == ")":
+                self.nextToken()
+                if self.itr.cur.lexema == "{":
+                    self.nextToken()
+                    self.statementProduction()
+                    self.nextToken()
+                    if self.itr.cur.lexema == "}":
+                        self.nextToken()
+                    else:
+                        self.sintaxErrors.append(sintaxError(self.itr.cur, "}"))
+                        self.nextToken()
+                else:
+                    self.sintaxErrors.append(sintaxError(self.itr.cur, "{"))     
+            else:
+                self.sintaxErrors.append(sintaxError(self.itr.cur, ")"))
+        else:
+            self.sintaxErrors.append(sintaxError(self.itr.cur, "("))
+
+    def elseProduction(self) -> None:
+        self.nextToken()
+        self.statementProduction()                    # self.nextToken()
+
     def printProduction(self) -> None:
         pass
 
     def functionDeclProduction(self) -> None:
-        pass
+        self.nextToken()
+        if self.itr.cur.lexema in self.typeOf:
+            self.nextToken()
+            if self.itr.cur.type == "IDE":
+                self.nextToken()
+                if self.itr.cur.lexema == "(":
+                    self.nextToken()
+                    if self.itr.cur.lexema == ")":
+                        self.nextToken()
+                        self.statementProduction()                    # self.nextToken()
+                    else:
+                        self.sintaxErrors.append(sintaxError(self.itr.cur, ")"))
+                else:
+                    self.sintaxErrors.append(sintaxError(self.itr.cur, "("))
+            else:
+                    self.sintaxErrors.append(sintaxError(self.itr.cur, "IDE"))
+        else:
+            self.sintaxErrors.append(sintaxError(self.itr.cur, "Type"))
 
 
 if __name__ == "__main__":
     codigoFonte = '''
     procedure start { 
-        while()
-        typedef struct { 
-            var { int roberto, daniel; boolean teste;} 
-            const { int teste;} 
-        }teste;
+        function real algo()
+        if(){
+            
+        
+        else
     } '''
     gtokens = GenerateTokens(codigoFonte)
     tokens = gtokens.initialState()
