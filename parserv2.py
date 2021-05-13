@@ -12,6 +12,8 @@ ELSE_FOLLOW = {}
 STRUCT_FOLLOW = {}
 WHILE_FOLLOW = {}
 
+# olhar o próximo, se for o que se espera, consome, diz q deu erro ||
+
 class ParserV2():
     typeOf = {"int", "real", "string", "boolean"}
     variable = {"const", "var"}
@@ -25,7 +27,7 @@ class ParserV2():
             "if": self.ifProduction,
             #"else": self.elseProduction, # Não deveria estar aqui
             #  "print": self.printProduction,
-            #  "function": self.functionDeclProduction,
+            "function": self.functionProcedure,
             "var" or "const": self.varProduction,
             #  "}": self.nextToken,
         }
@@ -72,6 +74,29 @@ class ParserV2():
         self.nextToken('else')
         self.statementProduction()
 
+    def functionProcedure(self) -> None:
+        if self.itr.cur.lexema == 'procedure':
+            self.nextToken('procedure')
+            self.procedureBody()
+        elif self.itr.cur.lexema == 'function':
+            self.nextToken('function')
+            if self.itr.cur.lexema in self.typeOf:
+                self.nextToken(self.itr.cur.lexema)
+                self.functionBody()
+            
+    def procedureBody(self) -> None:
+        if self.itr.cur.type == "IDE":
+            self.nextToken(self.itr.cur.lexema)
+            self.paramsProduction()
+            self.statementProduction()
+    
+    def functionBody(self) -> None:
+        if self.itr.cur.type == "IDE":
+            self.nextToken(self.itr.cur.lexema)
+            self.paramsProduction()
+            # self.statementProduction()
+            # self.returnProcedure()
+
     def expressionProduction(self) -> None:
         if self.nextToken('('):
             # Definição de expressão
@@ -79,8 +104,17 @@ class ParserV2():
     
     def paramsProduction(self) -> None: # Deveria retornar true ou false? caso de erro
         if self.nextToken('('):
-            # Definição de parametros
+            self.params()
             self.nextToken(')')
+    
+    def params(self) -> None:
+        if self.itr.cur.lexema in self.typeOf:
+            self.nextToken(self.itr.cur.lexema)
+            if self.itr.cur.type == 'IDE':
+                self.nextToken(self.itr.cur.lexema)
+                if self.itr.cur.lexema == ',':
+                    self.nextToken(',')
+                    self.params()
            
     def varProduction(self) -> None:
         if self.itr.cur.lexema in self.variable:
@@ -118,8 +152,8 @@ class ParserV2():
 
     def nextToken(self, lexema) -> bool:
         # balanceamento de {}, para indicar se ficou faltando fechar algo
-        self.bracketsBalance()
         if self.itr.cur != None:
+            self.bracketsBalance()
             if self.itr.cur.lexema == lexema:
                 self.sintax_analisys.append(self.itr.cur)
                 self.itr.next()
@@ -142,19 +176,18 @@ class ParserV2():
         else:  
             self.statementProduction()
     
-    def getSintaxAnalisys(self) -> list:
-        return self.sintax_analisys
-    
     def bracketsBalance(self) -> None:
         if self.itr.cur.lexema == '{':
             self.brackets_stack.append(self.itr.cur)
         elif self.itr.cur.lexema == '}':
             self.brackets_stack.pop()
 
+    def getSintaxAnalisys(self) -> list:
+        return self.sintax_analisys
+
 if __name__ == "__main__":
     codigoFonte = '''procedure start {
-         var{ int roberto; string bob;}
-        const { string teste, teste2;}
+        function int teste(int a, int b)
     }'''
     gtokens = GenerateTokens(codigoFonte)
     tokens = gtokens.initialState()
