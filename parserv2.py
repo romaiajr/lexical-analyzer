@@ -25,12 +25,12 @@ class ParserV2():
             "typedef": self.structProduction,
             "while": self.whileProduction,
             "if": self.ifProduction,
-            #"else": self.elseProduction, # Não deveria estar aqui
             #  "print": self.printProduction,
             "function": self.functionProcedure,
             "var" or "const": self.varProduction,
             #  "}": self.nextToken,
         }
+        
 
     def sintaxParser(self) -> list:
         self.initProduction()
@@ -94,19 +94,72 @@ class ParserV2():
         if self.itr.cur.type == "IDE":
             self.nextToken(self.itr.cur.lexema)
             self.paramsProduction()
-            # self.statementProduction()
+            self.statementProduction()
             # self.returnProcedure()
 
     def expressionProduction(self) -> None:
         if self.nextToken('('):
-            # Definição de expressão
-            self.nextToken(')')
+            self.orExpression()
+            self.nextToken(')') 
+
+    def orExpression(self) -> None:
+        self.andExpression()
+        if self.itr.cur.lexema=="||":
+            self.nextToken("||")
+            self.orExpression()
+
+    def andExpression(self) -> None:
+        self.equalityExpression()
+        if self.itr.cur.lexema=="&&":
+            self.nextToken("&&")
+            self.andExpression()
     
+    def equalityExpression(self) -> None:
+        equality = {"==", "!="}
+        self.compareExpression()
+        if self.itr.cur.lexema in equality:
+            self.nextToken(self.itr.cur.lexema)
+            self.equalityExpression()
+
+    def compareExpression(self) -> None:
+        compare = {">", "<",">=","<="}
+        self.addExpression()
+        if self.itr.cur.lexema in compare:
+            self.nextToken(self.itr.cur.lexema)
+            self.compareExpression()
+
+    def addExpression(self) -> None:
+        add = {"+", "-"}
+        self.multiplicationExpression()
+        if self.itr.cur.lexema in add:
+            self.nextToken(self.itr.cur.lexema)
+            self.addExpression()
+
+    def multiplicationExpression(self) -> None:
+        exp = {"*", "/"}
+        self.notExpression()
+        if self.itr.cur.lexema in exp:
+            self.nextToken(self.itr.cur.lexema)
+            self.multiplicationExpression() 
+
+    def notExpression(self) -> None:
+        exp = {"IDE","NRO","CAD","true","false"}
+        if self.itr.cur.lexema == "!":
+            self.nextToken(self.itr.cur.lexema)
+            self.notExpression()
+        elif self.itr.cur.lexema == "(":
+            self.expressionProduction()
+        elif self.itr.cur.type in exp:
+            self.nextToken(self.itr.cur.lexema)
+        else:
+            self.sintax_analisys.append(sintaxError(self.itr.cur,"valid expression"))
+            self.itr.next()
+                   
     def paramsProduction(self) -> None: # Deveria retornar true ou false? caso de erro
         if self.nextToken('('):
             self.params()
             self.nextToken(')')
-    
+
     def params(self) -> None:
         if self.itr.cur.lexema in self.typeOf:
             self.nextToken(self.itr.cur.lexema)
@@ -115,7 +168,7 @@ class ParserV2():
                 if self.itr.cur.lexema == ',':
                     self.nextToken(',')
                     self.params()
-           
+
     def varProduction(self) -> None:
         if self.itr.cur.lexema in self.variable:
             self.nextToken(self.itr.cur.lexema)
@@ -187,7 +240,11 @@ class ParserV2():
 
 if __name__ == "__main__":
     codigoFonte = '''procedure start {
-        function int teste(int a, int b)
+        if (a>b){
+            var {
+                int a; 
+            }
+        }    
     }'''
     gtokens = GenerateTokens(codigoFonte)
     tokens = gtokens.initialState()
