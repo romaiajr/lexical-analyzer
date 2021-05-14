@@ -22,13 +22,19 @@ class ParserV2():
         self.sintax_analisys = [] # guarda os erros e sucessos do analisador sintático
         self.brackets_stack = [] # balanceamento de { }
         self.statement_dict = {
-            "typedef": self.structProduction,
-            "while": self.whileProduction,
-            "if": self.ifProduction,
-            #  "print": self.printProduction,
+            # "read": self.readProduction,
+            # "print": self.printProduction,
+            # var usage
+            # var scope
             "function": self.functionProcedure,
-            "var" or "const": self.varProduction,
-            #  "}": self.nextToken,
+            "procedure": self.functionProcedure,
+            "typedef": self.structProduction,
+            "var": self.varProduction,
+            "const": self.varProduction,
+            # "IDE": self.callFunction, foi feito como um if no statement
+            "if": self.ifProduction,
+            "while": self.whileProduction,
+            
         }
         
 
@@ -36,7 +42,7 @@ class ParserV2():
         self.initProduction()
         return self.getSintaxAnalisys()
 
-    def initProduction(self) -> None:
+    def initProduction(self) -> None: # Funcionando corretamente
         if self.nextToken('procedure'):
             if self.nextToken('start'):
                 self.startProduction()
@@ -47,34 +53,43 @@ class ParserV2():
     
     def statementProduction(self) -> None:
         if self.nextToken('{'):
-            statement = self.statement_dict[self.itr.cur.lexema]
-            statement()
-            self.nextToken('}')
+            self.statementList()
+            self.nextToken('}') # Não tá chegando aqui
     
-    def structProduction(self) -> None:
-        self.nextToken('typedef')
-        if self.nextToken('struct'):
-            if self.nextToken('{'):
-                self.varProduction()
-                self.nextToken('}')
+    def statementList(self) -> None:
+        if self.itr.cur != None:
+            if self.itr.cur.type == 'IDE':
+                self.callFunction()
+                self.statementList()
+            elif self.itr.cur.lexema in self.statement_dict:
+                statement = self.statement_dict[self.itr.cur.lexema]
+                statement()
+                self.statementList()
+        
+    def structProduction(self) -> None: # Revisar
+            self.nextToken('typedef')
+            if self.nextToken('struct'):
+                if self.nextToken('{'):
+                    self.varProduction()
+                    self.nextToken('}')
                     
-    def whileProduction(self) -> None:
+    def whileProduction(self) -> None: # Funcionando corretamente
         self.nextToken('while')
         self.expressionProduction()
         self.statementProduction()
 
-    def ifProduction(self) -> None:
+    def ifProduction(self) -> None: # Funcionando corretamente
         self.nextToken('if')           
         self.expressionProduction()      
         self.statementProduction()     
         if self.itr.cur.lexema == 'else':
             self.elseStatement()
 
-    def elseStatement(self) -> None:
+    def elseStatement(self) -> None: # Funcionando corretamente
         self.nextToken('else')
         self.statementProduction()
 
-    def functionProcedure(self) -> None:
+    def functionProcedure(self) -> None: # Funcionando corretamente
         if self.itr.cur.lexema == 'procedure':
             self.nextToken('procedure')
             self.procedureBody()
@@ -84,7 +99,7 @@ class ParserV2():
                 self.nextToken(self.itr.cur.lexema)
                 self.functionBody()
             
-    def procedureBody(self) -> None:
+    def procedureBody(self) -> None: # Funcionando corretamente
         if self.itr.cur.type == "IDE":
             self.nextToken(self.itr.cur.lexema)
             self.paramsProduction()
@@ -149,18 +164,18 @@ class ParserV2():
             self.notExpression()
         elif self.itr.cur.lexema == "(":
             self.expressionProduction()
-        elif self.itr.cur.type in exp:
+        elif self.itr.cur.type in exp or self.itr.cur.lexema in exp:
             self.nextToken(self.itr.cur.lexema)
         else:
             self.sintax_analisys.append(sintaxError(self.itr.cur,"valid expression"))
             self.itr.next()
                    
-    def paramsProduction(self) -> None: # Deveria retornar true ou false? caso de erro
+    def paramsProduction(self) -> None: # Funcionando corretamente
         if self.nextToken('('):
             self.params()
             self.nextToken(')')
 
-    def params(self) -> None:
+    def params(self) -> None: # Funcionando corretamente
         if self.itr.cur.lexema in self.typeOf:
             self.nextToken(self.itr.cur.lexema)
             if self.itr.cur.type == 'IDE':
@@ -168,6 +183,35 @@ class ParserV2():
                 if self.itr.cur.lexema == ',':
                     self.nextToken(',')
                     self.params()
+
+    def callFunction(self) -> None: # Funcionando corretamente
+        if self.itr.cur.type == 'IDE':
+            self.nextToken(self.itr.cur.lexema)
+            if self.nextToken('('):
+                self.args()
+                self.nextToken(')')
+
+    def args(self) -> None: # Funcionado corretamente
+        exp = {"IDE","NRO","CAD","true","false"}
+        if self.itr.cur.type in exp or self.itr.cur.lexema in exp:
+            self.nextToken(self.itr.cur.lexema)
+            if self.itr.cur.lexema == ",":
+                self.nextToken(self.itr.cur.lexema)
+                self.args()
+
+    def returnProduction(self) -> None:  # Funcionando corretamente
+        exp = {"NRO","CAD","true","false"}
+        if self.nextToken('return'):
+            if self.itr.cur.type in exp or self.itr.cur.lexema in exp:
+                self.nextToken(self.itr.cur.lexema)
+            elif self.itr.cur.type == 'IDE':
+                if self.itr.nxt.lexema == "(":
+                    self.callFunction()
+                else:
+                    self.nextToken(self.itr.cur.lexema)
+            elif self.itr.cur.lexema == '(':
+                self.expressionProduction()
+            self.nextToken(';')
 
     def varProduction(self) -> None:
         if self.itr.cur.lexema in self.variable:
@@ -206,7 +250,7 @@ class ParserV2():
     def nextToken(self, lexema) -> bool:
         # balanceamento de {}, para indicar se ficou faltando fechar algo
         if self.itr.cur != None:
-            self.bracketsBalance()
+            # self.bracketsBalance()
             if self.itr.cur.lexema == lexema:
                 self.sintax_analisys.append(self.itr.cur)
                 self.itr.next()
@@ -216,6 +260,8 @@ class ParserV2():
                 self.itr.next()
                 # self.panicState()
                 return False
+        else:
+            self.sintax_analisys.append(f'Erro Léxico no final do arquivo: Expected:"{lexema}", got "None"')
     
     def panicState(self, follow): # Follow é a variável global que guarda os tokens de sincronização
         while self.itr.cur.lexema not in follow:
@@ -240,16 +286,12 @@ class ParserV2():
 
 if __name__ == "__main__":
     codigoFonte = '''procedure start {
-        if (a>b){
-            var {
-                int a; 
-            }
-        }    
-    }'''
+        procedure teste(){    
+        }
+    '''
     gtokens = GenerateTokens(codigoFonte)
     tokens = gtokens.initialState()
     sintaxParser = ParserV2(tokens)
     result = sintaxParser.sintaxParser()
     for i in result:
         print(i)
-    print("Análise sintática finalizada!")
