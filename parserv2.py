@@ -24,6 +24,7 @@ class ParserV2():
         self.statement_dict = {
             # "read": self.readProduction,
             "print": self.printStatement,
+            "read":self.readStatement,
             # var usage
             # var scope
             "function": self.functionProcedure,
@@ -90,8 +91,10 @@ class ParserV2():
             self.nextToken(self.itr.cur.lexema)
             if self.itr.cur.lexema == '.':
                 self.structUsage()
+                self.moreExpressions()
             elif self.itr.cur.lexema == '[':
                 self.arrayUsage()
+                self.moreExpressions()
             else:
                 self.moreExpressions()
         elif self.itr.cur.type == "CAD":
@@ -103,12 +106,16 @@ class ParserV2():
             self.sintax_analisys.append(sintaxError(self.itr.cur,"Valid print"))
             self.itr.next()
 
+    def moreExpressions(self)->None: # Funcionando corretamente
+        if self.itr.cur.lexema==",":
+            self.nextToken(self.itr.cur.lexema)
+            self.printProduction()
+
     def structUsage(self)-> None: # Funcionando corretamente
         if self.itr.cur.lexema == '.':
             self.nextToken(self.itr.cur.lexema)
             if self.itr.cur.type == "IDE":
                 self.nextToken(self.itr.cur.lexema)
-                self.moreExpressions()
 
     def arrayUsage(self)-> None: # Funcionando corretamente
         exp = {"IDE","NRO","CAD","true","false"}
@@ -124,16 +131,39 @@ class ParserV2():
                     #else:
                         #self.sintax_analisys.append(sintaxError(self.itr.cur,"valid expression"))
                         #self.itr.next()
-                self.moreExpressions()
+                #self.moreExpressions()
             #else:
                 #self.sintax_analisys.append(sintaxError(self.itr.cur,"valid expression"))
                 #self.itr.next()
                
-                
-    def moreExpressions(self)->None: # Funcionando corretamente
+    def readStatement(self)->None: # Funcionando corretamente
+        self.nextToken('read')           
+        if self.nextToken('('):
+            self.readProduction()
+            self.nextToken(')')
+        self.nextToken(";")
+
+    def readProduction(self)->None: # Funcionando corretamente
+        if self.itr.cur.type == "IDE":
+            self.nextToken(self.itr.cur.lexema)
+            if self.itr.cur.lexema == '.':
+                self.structUsage()
+                self.moreReadings()
+            elif self.itr.cur.lexema == '[':
+                self.arrayUsage()
+                self.moreReadings()
+            else:
+                self.moreReadings()
+        elif self.itr.cur.lexema ==")":
+            return
+        else:
+            self.sintax_analisys.append(sintaxError(self.itr.cur,"Valid read"))
+            self.itr.next()
+
+    def moreReadings(self)->None: # Funcionando corretamente
         if self.itr.cur.lexema==",":
             self.nextToken(self.itr.cur.lexema)
-            self.printProduction()
+            self.readProduction()
 
     def ifProduction(self) -> None: # Funcionando corretamente
         self.nextToken('if')           
@@ -360,10 +390,18 @@ class ParserV2():
         return self.sintax_analisys
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     codigoFonte = '''procedure start { 
         if(a>>b){
         }
     }'''
+=======
+    codigoFonte = '''procedure start {
+        print("algo");
+        read("algo"); 
+    }
+    '''
+>>>>>>> 0d29af81d63dd6b89a46fc8c7635ab0b09fc80ba
     gtokens = GenerateTokens(codigoFonte)
     tokens = gtokens.initialState()
     sintaxParser = ParserV2(tokens)
