@@ -43,17 +43,14 @@ class ParserV2():
     def initProduction(self) -> None: # Funcionando corretamente
         if self.nextToken('procedure'):
             if self.nextToken('start'):
-                self.startProduction()
+                self.statementProduction()
                    
-    def startProduction(self) -> None:
-        self.statementProduction()
-    
-    def statementProduction(self) -> None:
+    def statementProduction(self) -> None: # Funcionando corretamente
         if self.nextToken('{'):
             self.statementList()
-            self.nextToken('}') # Não tá chegando aqui
+            self.nextToken('}')
     
-    def statementList(self) -> None:
+    def statementList(self) -> None: # Funcionando corretamente
         if self.itr.cur != None:
             if self.itr.cur.type == 'IDE':
                 self.callFunction()
@@ -133,7 +130,7 @@ class ParserV2():
                 #self.itr.next()
                
                 
-    def moreExpressions(self)->None:
+    def moreExpressions(self)->None: # Funcionando corretamente
         if self.itr.cur.lexema==",":
             self.nextToken(self.itr.cur.lexema)
             self.printProduction()
