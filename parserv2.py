@@ -326,10 +326,30 @@ class ParserV2():
         if self.itr.cur.type == 'IDE':
             self.nextToken(self.itr.cur.lexema)
             if self.itr.cur.lexema == '=':
-                pass
+                self.nextToken("=")
+                if self.itr.cur.type == 'IDE':
+                    if self.itr.nxt.lexema == '(':
+                        self.callFunction()
+                    elif self.itr.nxt.lexema == '.':
+                        self.structUsage()
+                # elif self.itr.cur.lexema == '(':
+                #     self.expressionProduction()
             elif self.itr.cur.lexema == '[':
-                pass
+                self.arrayUsage()
+                if self.itr.cur.lexema == '=':
+                    self.nextToken('=')
+                    self.nextToken('{')
+                    self.varArg()
+                    self.nextToken('}')
     
+    def varArg(self) -> None:
+        exp = {'IDE','NRO','CAD','true','false'}
+        if self.itr.cur.type in exp or self.itr.cur.lexema in exp:
+            self.nextToken(self.itr.cur.lexema)
+            if self.itr.cur.lexema == ',':
+                self.nextToken(',')
+                self.varArg()
+
     def constDeclaration(self) -> None:
         pass
 
@@ -390,18 +410,11 @@ class ParserV2():
         return self.sintax_analisys
 
 if __name__ == "__main__":
-<<<<<<< HEAD
-    codigoFonte = '''procedure start { 
-        if(a>>b){
-        }
-    }'''
-=======
     codigoFonte = '''procedure start {
         print("algo");
         read("algo"); 
     }
     '''
->>>>>>> 0d29af81d63dd6b89a46fc8c7635ab0b09fc80ba
     gtokens = GenerateTokens(codigoFonte)
     tokens = gtokens.initialState()
     sintaxParser = ParserV2(tokens)
