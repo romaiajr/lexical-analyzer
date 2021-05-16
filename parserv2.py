@@ -421,6 +421,7 @@ if __name__ == "__main__":
         struct typedef{
             var{ int a, b, c[]; string a = "teste";}
         }id;
+        var{ a[a+b];}
     }
     '''
     gtokens = GenerateTokens(codigoFonte)
