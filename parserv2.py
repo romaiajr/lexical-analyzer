@@ -44,12 +44,12 @@ class ParserV2():
     def initProduction(self) -> None: # Funcionando corretamente
         if self.nextToken('procedure'):
             if self.nextToken('start'):
-                self.statementProduction()
+                if self.nextToken('{'):
+                    self.statementProduction()
+                    self.nextToken('}')
                    
     def statementProduction(self) -> None: # Funcionando corretamente
-        if self.nextToken('{'):
-            self.statementList()
-            self.nextToken('}')
+        self.statementList()
     
     def statementList(self) -> None: # Funcionando corretamente
         if self.itr.cur != None:
@@ -76,8 +76,12 @@ class ParserV2():
                     
     def whileProduction(self) -> None: # Funcionando corretamente
         self.nextToken('while')
-        self.expressionProduction()
-        self.statementProduction()
+        if self.nextToken('('):
+            self.expressionProduction()
+            self.nextToken(')')
+        if self.nextToken('{'):
+            self.statementProduction()
+            self.nextToken('}')
 
     def printStatement(self)->None: # Funcionando corretamente
         self.nextToken('print')           
@@ -167,15 +171,21 @@ class ParserV2():
 
     def ifProduction(self) -> None: # Funcionando corretamente
         self.nextToken('if')           
-        self.expressionProduction()
+        if self.nextToken('('):
+            self.expressionProduction()
+            self.nextToken(')')
         self.nextToken('then')      
-        self.statementProduction()     
+        if self.nextToken('{'):
+            self.statementProduction()
+            self.nextToken('}')    
         if self.itr.cur.lexema == 'else':
             self.elseStatement()
 
     def elseStatement(self) -> None: # Funcionando corretamente
         self.nextToken('else')
-        self.statementProduction()
+        if self.nextToken('{'):
+            self.statementProduction()
+            self.nextToken('}')
 
     def functionProcedure(self) -> None: # Funcionando corretamente
         if self.itr.cur.lexema == 'procedure':
@@ -191,20 +201,22 @@ class ParserV2():
         if self.itr.cur.type == "IDE":
             self.nextToken(self.itr.cur.lexema)
             self.paramsProduction()
-            self.statementProduction()
+            if self.nextToken('{'):
+                self.statementProduction()
+                self.nextToken('}')
     
     def functionBody(self) -> None:
         if self.itr.cur.type == "IDE":
             self.nextToken(self.itr.cur.lexema)
             self.paramsProduction()
-            self.statementProduction()
-            # self.returnProcedure()
-
+            if self.nextToken('{'):
+                self.statementProduction()
+                self.returnProcedure()
+                self.nextToken('}')
+            
     def expressionProduction(self) -> None: 
-        if self.nextToken('('):
-            self.orExpression()
-            self.nextToken(')') 
-
+        self.orExpression()
+        
     def orExpression(self) -> None:
         self.andExpression()
         if self.itr.cur.lexema=="||":
@@ -251,7 +263,9 @@ class ParserV2():
             self.nextToken(self.itr.cur.lexema)
             self.notExpression()
         elif self.itr.cur.lexema == "(":
+            self.nextToken('(')
             self.expressionProduction()
+            self.nextToken(')')
         elif self.itr.cur.type in exp or self.itr.cur.lexema in exp:
             self.nextToken(self.itr.cur.lexema)
         else:
@@ -298,7 +312,9 @@ class ParserV2():
                 else:
                     self.nextToken(self.itr.cur.lexema)
             elif self.itr.cur.lexema == '(':
+                self.nextToken('(')
                 self.expressionProduction()
+                self.nextToken(')')
             self.nextToken(';')
 
     
@@ -398,7 +414,9 @@ class ParserV2():
         if self.itr.cur == None:
             return
         else:  
+            self.nextToken('{')
             self.statementProduction()
+            self.nextToken('}')
     
     def bracketsBalance(self) -> None:
         if self.itr.cur.lexema == '{':
@@ -412,7 +430,7 @@ class ParserV2():
 if __name__ == "__main__":
     codigoFonte = '''procedure start {
         print("algo");
-        read("algo"); 
+        read(a); 
     }
     '''
     gtokens = GenerateTokens(codigoFonte)
