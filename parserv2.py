@@ -332,15 +332,17 @@ class ParserV2():
                         self.callFunction()
                     elif self.itr.nxt.lexema == '.':
                         self.structUsage()
-                # elif self.itr.cur.lexema == '(':
-                #     self.expressionProduction()
-            elif self.itr.cur.lexema == '[':
-                self.arrayUsage()
-                if self.itr.cur.lexema == '=':
-                    self.nextToken('=')
-                    self.nextToken('{')
-                    self.varArg()
-                    self.nextToken('}')
+                    else:
+                        self.expressionProduction()
+                elif self.itr.cur.lexema == '[':
+                    self.arrayUsage()
+                    if self.itr.cur.lexema == '=':
+                        self.nextToken('=')
+                        self.nextToken('{')
+                        self.varArg()
+                        self.nextToken('}')
+                elif self.itr.cur.lexema in {'local','global'}:
+                    self.variableScope()
     
     def varArg(self) -> None:
         exp = {'IDE','NRO','CAD','true','false'}
@@ -413,6 +415,12 @@ if __name__ == "__main__":
     codigoFonte = '''procedure start {
         print("algo");
         read("algo"); 
+        if((a+b)*2 == 1) then{
+
+        }
+        struct typedef{
+            var{ int a, b, c[]; string a = "teste";}
+        }id;
     }
     '''
     gtokens = GenerateTokens(codigoFonte)
