@@ -348,6 +348,7 @@ class ParserV2():
                         self.callFunction()
                     elif self.itr.nxt.lexema == '.':
                         self.structUsage()
+                        
                 # elif self.itr.cur.lexema == '(':
                 #     self.expressionProduction()
             elif self.itr.cur.lexema == '[':
