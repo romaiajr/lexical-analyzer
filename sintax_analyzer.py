@@ -1,20 +1,9 @@
 from typing import List
 from iterator import MyIterator
-from sintaxError import sintaxError
+from sintax_error import SintaxError
 from generate_tokens import GenerateTokens
 
-# Conjunto comum de tokens de sincronização
-COMMOM_FOLLOW = {}
-
-# Conjunto de sincronização específicos
-IF_FOLLOW = {}
-ELSE_FOLLOW = {}
-STRUCT_FOLLOW = {}
-WHILE_FOLLOW = {}
-
-# olhar o próximo, se for o que se espera, consome, diz q deu erro ||
-
-class ParserV2():
+class Parser():
     typeOf = {"int", "real", "string", "boolean"}
     variable = {"const", "var"}
     def __init__(self, tokens: list):
@@ -34,7 +23,6 @@ class ParserV2():
             "const": self.varProduction,
             "if": self.ifProduction,
             "while": self.whileProduction,
-            
         }
         
     def sintaxParser(self) -> list:
@@ -64,7 +52,7 @@ class ParserV2():
                 statement = self.statement_dict[self.itr.cur.lexema]
                 statement()
                 self.statementList()
-        
+
     def structProduction(self) -> None: # Funcionando corretamente
             self.nextToken('typedef')
             if self.nextToken('struct'):
@@ -73,15 +61,16 @@ class ParserV2():
                     if self.itr.cur.type == "IDE":
                         self.nextToken()
                     else:
-                        self.sintax_analisys.append(sintaxError(self.itr.cur,"Identifier"))
+                        self.sintax_analisys.append(SintaxError(self.itr.cur,"Identifier"))
                 if self.nextToken('{'):
                     self.varProduction()
                     self.nextToken('}')
                     if self.itr.cur.type == 'IDE':
                         self.nextToken()
-                        self.nextToken(';')
                     else:
-                        self.sintax_analisys.append(sintaxError(self.itr.cur,"Identifier"))
+                        self.sintax_analisys.append(SintaxError(self.itr.cur,"Identifier"))
+                    self.nextToken(';')
+                    
 
                     
     def whileProduction(self) -> None: # Funcionando corretamente
@@ -114,8 +103,10 @@ class ParserV2():
         elif self.itr.cur.type == "CAD":
             self.nextToken()
             self.moreExpressions()
+        elif self.itr.cur.lexema ==")":
+            return
         else:
-            self.sintax_analisys.append(sintaxError(self.itr.cur,"Valid print"))
+            self.sintax_analisys.append(SintaxError(self.itr.cur,"Valid arguments"))
             self.itr.next()
 
     def moreExpressions(self)->None: # Funcionando corretamente
@@ -140,13 +131,12 @@ class ParserV2():
                     if self.itr.cur.type in exp or self.itr.cur.lexema in exp:
                         self.nextToken()
                         self.nextToken(']')
-                    #else:
-                        #self.sintax_analisys.append(sintaxError(self.itr.cur,"valid expression"))
-                        #self.itr.next()
-                #self.moreExpressions()
-            #else:
-                #self.sintax_analisys.append(sintaxError(self.itr.cur,"valid expression"))
-                #self.itr.next()
+                    else:
+                        self.sintax_analisys.append(SintaxError(self.itr.cur,"Valid expressions"))
+                        self.itr.next()
+            else:
+                self.sintax_analisys.append(SintaxError(self.itr.cur,"Valid expressions"))
+                self.itr.next()
                
     def readStatement(self)->None: # Funcionando corretamente
         self.nextToken('read')           
@@ -169,7 +159,7 @@ class ParserV2():
         elif self.itr.cur.lexema ==")":
             return
         else:
-            self.sintax_analisys.append(sintaxError(self.itr.cur,"Valid read"))
+            self.sintax_analisys.append(SintaxError(self.itr.cur,"Valid read"))
             self.itr.next()
 
     def moreReadings(self)->None: # Funcionando corretamente
@@ -212,6 +202,10 @@ class ParserV2():
             if self.nextToken('{'):
                 self.statementProduction()
                 self.nextToken('}')
+        else:
+            self.sintax_analisys.append(SintaxError(self.itr.cur,"Identifier"))
+            self.itr.next()
+        
     
     def functionBody(self) -> None: # Funcionando corretamente
         if self.itr.cur.type == "IDE":
@@ -221,6 +215,9 @@ class ParserV2():
                 self.statementProduction()
                 self.returnProduction()
                 self.nextToken('}')
+        else:
+            self.sintax_analisys.append(SintaxError(self.itr.cur,"Identifier"))
+            self.itr.next()
 
     def expressionProduction(self) -> None: 
         self.orExpression()
@@ -277,7 +274,7 @@ class ParserV2():
         elif self.itr.cur.type in exp or self.itr.cur.lexema in exp:
             self.nextToken()
         else:
-            self.sintax_analisys.append(sintaxError(self.itr.cur,"valid expression"))
+            self.sintax_analisys.append(SintaxError(self.itr.cur,"Valid expression"))
             self.itr.next()
                    
     def paramsProduction(self) -> None: # Funcionando corretamente
@@ -293,6 +290,9 @@ class ParserV2():
                 if self.itr.cur.lexema == ',':
                     self.nextToken()
                     self.params()
+        else:
+            self.sintax_analisys.append(SintaxError(self.itr.cur,"Valid param"))
+            self.itr.next()
 
     def callFunction(self) -> None: # Funcionando corretamente
         if self.itr.cur.type == 'IDE':
@@ -319,11 +319,14 @@ class ParserV2():
                 if self.itr.nxt.lexema == "(":
                     self.callFunction()
                 else:
-                    self.nextToken()
+                    self.expressionProduction()
             elif self.itr.cur.lexema == '(':
                 self.nextToken()
                 self.expressionProduction()
                 self.nextToken(')')
+            else:
+                self.sintax_analisys.append(SintaxError(self.itr.cur,"Valid return"))
+                self.itr.next()
             self.nextToken(';')
 
     
@@ -333,11 +336,14 @@ class ParserV2():
             if self.nextToken('{'):
                 self.varDeclaration()
                 self.nextToken('}')
+                self.varProduction()
         elif self.itr.cur.lexema == 'const':
             self.nextToken()
             if self.nextToken('{'):
                 self.constDeclaration()
                 self.nextToken('}')
+                self.varProduction()
+        
 
     def varDeclaration(self) -> None: # Funcionando corretamente
         if self.itr.cur.lexema in self.typeOf:
@@ -345,6 +351,10 @@ class ParserV2():
             self.variables()
             self.nextToken(';')
             self.varDeclaration()
+        elif self.itr.cur.lexema == '}':
+            return
+        else:
+            self.sintax_analisys.append(SintaxError(self.itr.cur,"Valid type"))
 
     def variables(self) -> None: # Funcionando corretamente
         if self.itr.cur.type == 'IDE':
@@ -384,6 +394,9 @@ class ParserV2():
                         self.nextToken('.')
                         if self.itr.cur.type == 'IDE':
                             self.nextToken()
+        else:
+            self.sintax_analisys.append(SintaxError(self.itr.cur,"Identifier"))
+            self.itr.next()
         if self.itr.cur.lexema == ',':
             self.nextToken()
             self.variables()
@@ -395,6 +408,10 @@ class ParserV2():
             if self.itr.cur.lexema == ',':
                 self.nextToken()
                 self.varArg()
+        else:
+            self.sintax_analisys.append(SintaxError(self.itr.cur,"Valid values"))
+            self.itr.next()
+
     
     def varUsage(self) -> None: # Funcionando corretamente
         exp = {'IDE','NRO','CAD','true','false'}
@@ -423,7 +440,7 @@ class ParserV2():
                             if self.itr.cur.lexema == '[':
                                 self.arrayUsage()
                         else:
-                            self.sintax_analisys.append(sintaxError(self.itr.cur,"Identifier"))
+                            self.sintax_analisys.append(SintaxError(self.itr.cur,"Identifier"))
                     else:
                         self.expressionProduction()
             elif self.itr.nxt.lexema == '[':
@@ -446,7 +463,7 @@ class ParserV2():
                         if self.itr.cur.type == 'IDE':
                             self.nextToken()
                         else:
-                            self.sintax_analisys.append(sintaxError(self.itr.cur,"Identifier"))
+                            self.sintax_analisys.append(SintaxError(self.itr.cur,"Identifier"))
             else:
                 self.variables()
             self.nextToken(';')
@@ -474,6 +491,8 @@ class ParserV2():
                     if self.itr.cur.lexema == ',':
                         self.nextToken()
                         self.constants()
+        else:
+            self.sintax_analisys.append(SintaxError(self.itr.cur,"Identifier"))
 
     def nextToken(self, lexema = None) -> bool:
         # balanceamento de {}, para indicar se ficou faltando fechar algo
@@ -484,27 +503,12 @@ class ParserV2():
                 self.itr.next()
                 return True
             else:
-                self.sintax_analisys.append(sintaxError(self.itr.cur, lexema))
+                self.sintax_analisys.append(SintaxError(self.itr.cur, lexema))
                 self.itr.next()
-                # self.panicState()
                 return False
         else:
-            self.sintax_analisys.append(f'Erro Léxico no final do arquivo: Expected:"{lexema}", got "None"')
-    
-    def panicState(self, follow): # Follow é a variável global que guarda os tokens de sincronização
-        while self.itr.cur.lexema not in follow:
-            # balanceamento de {}, para indicar se ficou faltando fechar algo
-            self.bracketsBalance()
-            self.itr.next()
-            if self.itr.cur == None:
-                break
-        if self.itr.cur == None:
-            return
-        else:  
-            self.nextToken('{')
-            self.statementProduction()
-            self.nextToken('}')
-    
+            self.sintax_analisys.append(f'Erro de sintaxe no final do arquivo: Expected:"{lexema}", got "None"')
+
     def bracketsBalance(self) -> None:
         if self.itr.cur.lexema == '{':
             self.brackets_stack.append(self.itr.cur)
@@ -515,12 +519,26 @@ class ParserV2():
         return self.sintax_analisys
 
 if __name__ == "__main__":
-    codigoFonte = '''procedure start{
-
-    }'''
+    codigoFonte = '''procedure start {
+        if(a*b == c) then{
+            function int teste(string a, int b){
+                return a;
+            }
+        }
+        else{
+            typedef struct extends pessoa{
+                var { string nome = "roberto", sobrenome = "maia"; int idade = 17;}
+                const { string sexo = "M";}
+            }pessoa;
+        }
+        while(a < b){
+            print("roberto");
+            a = a+1;
+        }
+}'''
     gtokens = GenerateTokens(codigoFonte)
     tokens = gtokens.initialState()
-    sintaxParser = ParserV2(tokens)
+    sintaxParser = Parser(tokens)
     result = sintaxParser.sintaxParser()
     for i in result:
         print(i)

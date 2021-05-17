@@ -1,9 +1,0 @@
-/* 
-	teste08 - sem erros
-*/
-"café"
-const int MAX = 10, MAX2 = 50;
-	
-string Mensagem = "Hello world\"";
-
-procedure start {  // comeca aqui o programa principal 
