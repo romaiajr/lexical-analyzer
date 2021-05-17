@@ -1,5 +1,7 @@
 import os
 from generate_tokens import GenerateTokens
+from sintax_analyzer import Parser
+from sintax_error import SintaxError
 path = "./input/"
 if os.path.isdir(path):
     files = os.listdir(path)
@@ -15,20 +17,26 @@ if os.path.isdir(path):
                     # Gerando e armazenando tokens e erros
                     gtokens = GenerateTokens(codigoFonte)
                     tokens = gtokens.initialState()
-                    errors = gtokens.getErrorTokens()
-
+                    lexicalErrors = gtokens.getErrorTokens()
+                    
+                    # Análise Sintática
+                    sintaxParser = Parser(tokens)
+                    sintaxResult = sintaxParser.sintaxParser()
+                    sintaxErrors = 0
                     # Escrevendo no arquivo de saída
-                    for token in tokens:
-                        out.write(str(token) + "\n")
+                    for item in sintaxResult:
+                        out.write(str(item) + "\n")
+                        if type(item) == SintaxError:
+                            sintaxErrors += 1
                     out.write("\n")
-                    for error in errors:
+                    for error in lexicalErrors:
                         out.write(str(error) + "\n")
                     
-                    if len(errors) > 0:
-                        print (f"ERRO: Encontrados {len(errors)} erros durante a leitura do arquivo {file}")
+                    if len(lexicalErrors) + sintaxErrors > 0:
+                        print (f"ERRO: Encontrados {len(lexicalErrors) + sintaxErrors} erros durante a leitura do arquivo {file}")
                     else:
-                        out.write(f"SUCESSO: O arquivo {file} foi lido com sucesso! Não foram encontrados erros.")
-                        print(f"SUCESSO: O arquivo {file} foi lido com sucesso! Não foram encontrados erros.")
+                        out.write(f"SUCESSO: O arquivo {file} foi lido com sucesso! Não foram encontrados erros lexicos.")
+                        print(f"SUCESSO: O arquivo {file} foi lido com sucesso! Não foram encontrados erros lexicos.")
                 else:
                     print(f"ALERTA: O arquivo {file} foi ignorado. Nome do arquivo não corresponde ao padrão estabelecido.")
             else:
