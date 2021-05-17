@@ -56,6 +56,7 @@ class ParserV2():
             if self.itr.cur.type == 'IDE':
                 if self.itr.nxt.lexema == '(':
                     self.callFunction()
+                    self.nextToken(';')
                 else:
                     self.varUsage()
                 self.statementList()
@@ -68,16 +69,16 @@ class ParserV2():
             self.nextToken('typedef')
             if self.nextToken('struct'):
                 if self.itr.cur.lexema == 'extends':
-                    self.nextToken('extends')
+                    self.nextToken()
                     if self.itr.cur.type == "IDE":
-                        self.nextToken(self.itr.cur.lexema)
+                        self.nextToken()
                     else:
                         self.sintax_analisys.append(sintaxError(self.itr.cur,"Identifier"))
                 if self.nextToken('{'):
                     self.varProduction()
                     self.nextToken('}')
                     if self.itr.cur.type == 'IDE':
-                        self.nextToken(self.itr.cur.lexema)
+                        self.nextToken()
                         self.nextToken(';')
                     else:
                         self.sintax_analisys.append(sintaxError(self.itr.cur,"Identifier"))
@@ -101,7 +102,7 @@ class ParserV2():
 
     def printProduction(self)->None: # Funcionando corretamente
         if self.itr.cur.type == "IDE":
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             if self.itr.cur.lexema == '.':
                 self.structUsage()
                 self.moreExpressions()
@@ -111,35 +112,33 @@ class ParserV2():
             else:
                 self.moreExpressions()
         elif self.itr.cur.type == "CAD":
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             self.moreExpressions()
-        elif self.itr.cur.lexema ==")":
-            return
         else:
             self.sintax_analisys.append(sintaxError(self.itr.cur,"Valid print"))
             self.itr.next()
 
     def moreExpressions(self)->None: # Funcionando corretamente
         if self.itr.cur.lexema==",":
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             self.printProduction()
 
     def structUsage(self)-> None: # Funcionando corretamente
         if self.itr.cur.lexema == '.':
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             if self.itr.cur.type == "IDE":
-                self.nextToken(self.itr.cur.lexema)
+                self.nextToken()
 
     def arrayUsage(self)-> None: # Funcionando corretamente
         exp = {"IDE","NRO","CAD","true","false"}
         if self.nextToken('['):
             if self.itr.cur.type in exp or self.itr.cur.lexema in exp:
-                self.nextToken(self.itr.cur.lexema)
+                self.nextToken()
                 self.nextToken(']')
                 if self.itr.cur.lexema == '[':
-                    self.nextToken('[')
+                    self.nextToken()
                     if self.itr.cur.type in exp or self.itr.cur.lexema in exp:
-                        self.nextToken(self.itr.cur.lexema)
+                        self.nextToken()
                         self.nextToken(']')
                     #else:
                         #self.sintax_analisys.append(sintaxError(self.itr.cur,"valid expression"))
@@ -158,7 +157,7 @@ class ParserV2():
 
     def readProduction(self)->None: # Funcionando corretamente
         if self.itr.cur.type == "IDE":
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             if self.itr.cur.lexema == '.':
                 self.structUsage()
                 self.moreReadings()
@@ -175,7 +174,7 @@ class ParserV2():
 
     def moreReadings(self)->None: # Funcionando corretamente
         if self.itr.cur.lexema==",":
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             self.readProduction()
 
     def ifProduction(self) -> None: # Funcionando corretamente
@@ -191,36 +190,36 @@ class ParserV2():
             self.elseStatement()
 
     def elseStatement(self) -> None: # Funcionando corretamente
-        self.nextToken('else')
+        self.nextToken()
         if self.nextToken('{'):
             self.statementProduction()
             self.nextToken('}')
 
     def functionProcedure(self) -> None: # Funcionando corretamente
         if self.itr.cur.lexema == 'procedure':
-            self.nextToken('procedure')
+            self.nextToken()
             self.procedureBody()
         elif self.itr.cur.lexema == 'function':
-            self.nextToken('function')
+            self.nextToken()
             if self.itr.cur.lexema in self.typeOf:
-                self.nextToken(self.itr.cur.lexema)
+                self.nextToken()
                 self.functionBody()
             
     def procedureBody(self) -> None: # Funcionando corretamente
         if self.itr.cur.type == "IDE":
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             self.paramsProduction()
             if self.nextToken('{'):
                 self.statementProduction()
                 self.nextToken('}')
     
-    def functionBody(self) -> None:
+    def functionBody(self) -> None: # Funcionando corretamente
         if self.itr.cur.type == "IDE":
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             self.paramsProduction()
             if self.nextToken('{'):
                 self.statementProduction()
-                self.returnProcedure()
+                self.returnProduction()
                 self.nextToken('}')
 
     def expressionProduction(self) -> None: 
@@ -229,54 +228,54 @@ class ParserV2():
     def orExpression(self) -> None:
         self.andExpression()
         if self.itr.cur.lexema=="||":
-            self.nextToken("||")
+            self.nextToken()
             self.orExpression()
 
     def andExpression(self) -> None:
         self.equalityExpression()
         if self.itr.cur.lexema=="&&":
-            self.nextToken("&&")
+            self.nextToken()
             self.andExpression()
     
     def equalityExpression(self) -> None:
         equality = {"==", "!="}
         self.compareExpression()
         if self.itr.cur.lexema in equality:
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             self.equalityExpression()
 
     def compareExpression(self) -> None:
         compare = {">", "<",">=","<="}
         self.addExpression()
         if self.itr.cur.lexema in compare:
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             self.compareExpression()
 
     def addExpression(self) -> None:
         add = {"+", "-"}
         self.multiplicationExpression()
         if self.itr.cur.lexema in add:
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             self.addExpression()
 
     def multiplicationExpression(self) -> None:
         exp = {"*", "/"}
         self.notExpression()
         if self.itr.cur.lexema in exp:
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             self.multiplicationExpression() 
 
     def notExpression(self) -> None:
         exp = {"IDE","NRO","CAD","true","false"}
         if self.itr.cur.lexema == "!":
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             self.notExpression()
         elif self.itr.cur.lexema == "(":
-            self.nextToken('(')
+            self.nextToken()
             self.expressionProduction()
             self.nextToken(')')
         elif self.itr.cur.type in exp or self.itr.cur.lexema in exp:
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
         else:
             self.sintax_analisys.append(sintaxError(self.itr.cur,"valid expression"))
             self.itr.next()
@@ -288,81 +287,86 @@ class ParserV2():
 
     def params(self) -> None: # Funcionando corretamente
         if self.itr.cur.lexema in self.typeOf:
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             if self.itr.cur.type == 'IDE':
-                self.nextToken(self.itr.cur.lexema)
+                self.nextToken()
                 if self.itr.cur.lexema == ',':
-                    self.nextToken(',')
+                    self.nextToken()
                     self.params()
 
     def callFunction(self) -> None: # Funcionando corretamente
         if self.itr.cur.type == 'IDE':
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             if self.nextToken('('):
                 self.args()
                 self.nextToken(')')
+                
 
     def args(self) -> None: # Funcionado corretamente
         exp = {"IDE","NRO","CAD","true","false"}
         if self.itr.cur.type in exp or self.itr.cur.lexema in exp:
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             if self.itr.cur.lexema == ",":
-                self.nextToken(self.itr.cur.lexema)
+                self.nextToken()
                 self.args()
 
     def returnProduction(self) -> None:  # Funcionando corretamente
         exp = {"NRO","CAD","true","false"}
         if self.nextToken('return'):
             if self.itr.cur.type in exp or self.itr.cur.lexema in exp:
-                self.nextToken(self.itr.cur.lexema)
+                self.nextToken()
             elif self.itr.cur.type == 'IDE':
                 if self.itr.nxt.lexema == "(":
                     self.callFunction()
                 else:
-                    self.nextToken(self.itr.cur.lexema)
+                    self.nextToken()
             elif self.itr.cur.lexema == '(':
-                self.nextToken('(')
+                self.nextToken()
                 self.expressionProduction()
                 self.nextToken(')')
             self.nextToken(';')
 
     
-    def varProduction(self) -> None:
+    def varProduction(self) -> None: # Funcionando corretamente
         if self.itr.cur.lexema == 'var':
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             if self.nextToken('{'):
                 self.varDeclaration()
                 self.nextToken('}')
         elif self.itr.cur.lexema == 'const':
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             if self.nextToken('{'):
                 self.constDeclaration()
                 self.nextToken('}')
 
-    def varDeclaration(self) -> None:
+    def varDeclaration(self) -> None: # Funcionando corretamente
         if self.itr.cur.lexema in self.typeOf:
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             self.variables()
             self.nextToken(';')
             self.varDeclaration()
 
-    def variables(self) -> None:
+    def variables(self) -> None: # Funcionando corretamente
         if self.itr.cur.type == 'IDE':
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             if self.itr.cur.lexema == '=':
-                self.nextToken("=")
+                self.nextToken()
                 if self.itr.cur.type == 'IDE':
                     if self.itr.nxt.lexema == '(':
                         self.callFunction()
                     elif self.itr.nxt.lexema == '.':
+                        self.nextToken()
                         self.structUsage()
+                    elif self.itr.nxt.lexema == '[':
+                        self.nextToken()
+                        self.arrayUsage()
                     else:
                         self.expressionProduction()
                 elif self.itr.cur.lexema in {'local','global'}:
-                        self.nextToken(self.itr.cur.lexema)
+                        self.nextToken()
                         self.nextToken('.')
                         if self.itr.cur.type == 'IDE':
-                            self.nextToken(self.itr.cur.lexema)
+                            self.nextToken()
                             if self.itr.cur.lexema == '[':
                                 self.arrayUsage()
                 else:
@@ -370,107 +374,112 @@ class ParserV2():
             elif self.itr.cur.lexema == '[':
                 self.arrayUsage()
                 if self.itr.cur.lexema == '=':
-                    self.nextToken('=')
+                    self.nextToken()
                     if self.itr.cur.lexema == '{':
-                        self.nextToken('{')
+                        self.nextToken()
                         self.varArg()
                         self.nextToken('}')
                     elif self.itr.cur.lexema in {'local','global'}:
-                        self.nextToken(self.itr.cur.lexema)
+                        self.nextToken()
                         self.nextToken('.')
                         if self.itr.cur.type == 'IDE':
-                            self.nextToken(self.itr.cur.lexema)
+                            self.nextToken()
         if self.itr.cur.lexema == ',':
-            self.nextToken(',')
+            self.nextToken()
             self.variables()
 
-    def varArg(self) -> None:
+    def varArg(self) -> None: # Funcionando corretamente
         exp = {'IDE','NRO','CAD','true','false'}
         if self.itr.cur.type in exp or self.itr.cur.lexema in exp:
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             if self.itr.cur.lexema == ',':
-                self.nextToken(',')
+                self.nextToken()
                 self.varArg()
     
-    def varUsage(self) -> None: # Testar
+    def varUsage(self) -> None: # Funcionando corretamente
         exp = {'IDE','NRO','CAD','true','false'}
         if self.itr.cur.type == 'IDE':
             if self.itr.nxt.lexema == '.':
-                self.nextToken(self.itr.cur.lexema)
+                self.nextToken()
                 self.structUsage()
                 if self.itr.cur.lexema == '=':
-                    self.nextToken("=")
+                    self.nextToken()
                     if self.itr.cur.type == 'IDE':
                         if self.itr.nxt.lexema == '(':
                             self.callFunction()
                         elif self.itr.nxt.lexema == '.':
+                            self.nextToken()
                             self.structUsage()
                         elif self.itr.nxt.lexema == '[':
+                            self.nextToken()
                             self.arrayUsage()
                         else:
                             self.expressionProduction()
                     elif self.itr.cur.lexema in {'global', 'local'}:
-                        self.nextToken(self.itr.cur.lexema)
+                        self.nextToken()
                         self.nextToken('.')
                         if self.itr.cur.type == 'IDE':
-                            self.nextToken(self.itr.cur.lexema)
-                            self.arrayUsage()
+                            self.nextToken()
+                            if self.itr.cur.lexema == '[':
+                                self.arrayUsage()
                         else:
                             self.sintax_analisys.append(sintaxError(self.itr.cur,"Identifier"))
                     else:
                         self.expressionProduction()
-            elif self.itr.cur.lexema == '[':
-                self.nextToken(self.itr.cur.lexema)
+            elif self.itr.nxt.lexema == '[':
+                self.nextToken()
                 self.arrayUsage()
                 if self.itr.cur.lexema == '=':
-                    self.nextToken("=")
+                    self.nextToken()
                     if self.itr.cur.type == 'IDE':
                         if self.itr.nxt.lexema == '.':
+                            self.nextToken()
                             self.structUsage()
                         elif self.itr.nxt.lexema == '[':
+                            self.nextToken()
                             self.arrayUsage()
                     if self.itr.cur.type in exp or self.itr.cur.lexema in exp:
-                        self.nextToken(self.itr.cur.lexema)
+                        self.nextToken()
                     elif self.itr.cur.lexema in {'global', 'local'}:
-                        self.nextToken(self.itr.cur.lexema)
+                        self.nextToken()
                         self.nextToken('.')
                         if self.itr.cur.type == 'IDE':
-                            self.nextToken(self.itr.cur.lexema)
+                            self.nextToken()
                         else:
                             self.sintax_analisys.append(sintaxError(self.itr.cur,"Identifier"))
             else:
                 self.variables()
             self.nextToken(';')
 
-    def varScoped(self) -> None:
-        self.nextToken(self.itr.cur.lexema)
+    def varScoped(self) -> None: # Funcionando corretamente
+        self.nextToken()
         self.nextToken('.')
         self.variables()
         self.nextToken(';')
 
-    def constDeclaration(self) -> None:
+    def constDeclaration(self) -> None: # Funcionando corretamente
         if self.itr.cur.lexema in self.typeOf:
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             self.constants()
             self.nextToken(';')
             self.constDeclaration()
     
-    def constants(self) -> None:
+    def constants(self) -> None: # Funcionando corretamente
         exp = {'IDE','NRO','CAD','true','false'}
         if self.itr.cur.type == 'IDE':
-            self.nextToken(self.itr.cur.lexema)
+            self.nextToken()
             if self.nextToken('='):
                 if self.itr.cur.type in exp or self.itr.cur.lexema in exp:
-                    self.nextToken(self.itr.cur.lexema)
+                    self.nextToken()
                     if self.itr.cur.lexema == ',':
-                        self.nextToken(',')
+                        self.nextToken()
                         self.constants()
 
-    def nextToken(self, lexema) -> bool:
+    def nextToken(self, lexema = None) -> bool:
         # balanceamento de {}, para indicar se ficou faltando fechar algo
         if self.itr.cur != None:
             # self.bracketsBalance()
-            if self.itr.cur.lexema == lexema:
+            if self.itr.cur.lexema == lexema or lexema == None:
                 self.sintax_analisys.append(self.itr.cur)
                 self.itr.next()
                 return True
@@ -506,13 +515,18 @@ class ParserV2():
         return self.sintax_analisys
 
 if __name__ == "__main__":
-    codigoFonte = '''procedure start {
-      global.teste[1] = {a };
-    }
-    '''
+    codigoFonte = '''procedure start{
+
+    }'''
     gtokens = GenerateTokens(codigoFonte)
     tokens = gtokens.initialState()
     sintaxParser = ParserV2(tokens)
     result = sintaxParser.sintaxParser()
     for i in result:
         print(i)
+
+
+# Testar todas possibilidades de variáveis | OKAY
+# Testar todas as produções 
+# Tentar modificar o nextToken
+# Fazer erros para cada situação
