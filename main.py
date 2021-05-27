@@ -23,6 +23,7 @@ if os.path.isdir(path):
                     sintaxParser = Parser(tokens)
                     sintaxResult = sintaxParser.sintaxParser()
                     sintaxErrors = 0
+                    
                     # Escrevendo no arquivo de saída
                     for item in sintaxResult:
                         out.write(str(item) + "\n")
