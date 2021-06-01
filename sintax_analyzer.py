@@ -10,19 +10,23 @@ class Parser():
         self.itr = MyIterator(tokens)
         self.sintax_analisys = [] # guarda os erros e sucessos do analisador sintático
         self.brackets_stack = [] # balanceamento de { }
+        self.main = False
         self.statement_dict = {
             "read": self.readProduction,
             "print": self.printStatement,
             "read":self.readStatement,
             "local": self.varScoped,
             "global": self.varScoped,
-            "function": self.functionProcedure,
-            "procedure": self.functionProcedure,
             "typedef": self.structProduction,
-            "var": self.varProduction,
-            "const": self.varProduction,
             "if": self.ifProduction,
             "while": self.whileProduction,
+        }
+
+        self.global_dict = {
+            "var": self.varProduction,  #
+            "const": self.varProduction, #
+            "function": self.functionProcedure, #
+            "procedure": self.functionProcedure, #
         }
         
     def sintaxParser(self) -> list:
@@ -30,15 +34,18 @@ class Parser():
         return self.getSintaxAnalisys()
 
     def initProduction(self) -> None: # Funcionando corretamente
-        if self.nextToken('procedure'):
-            if self.nextToken('start'):
-                if self.nextToken('{'):
-                    self.statementProduction()
-                    self.nextToken('}')
-                   
+        while self.itr.cur.lexema in self.global_dict:
+            statement = self.global_dict[self.itr.cur.lexema]
+            statement()
+            if self.itr.cur == None:
+                break
+        if self.main == False:
+            self.sintax_analisys.append("Erro de sintaxe no final do arquivo: Missing procedure start.")
+
+
     def statementProduction(self) -> None: # Funcionando corretamente
         self.statementList()
-    
+
     def statementList(self) -> None: # Funcionando corretamente
         if self.itr.cur != None:
             if self.itr.cur.type == 'IDE':
@@ -52,7 +59,7 @@ class Parser():
                 statement = self.statement_dict[self.itr.cur.lexema]
                 statement()
                 self.statementList()
-
+    
     def structProduction(self) -> None: # Funcionando corretamente
             self.nextToken('typedef')
             if self.nextToken('struct'):
@@ -194,16 +201,31 @@ class Parser():
             if self.itr.cur.lexema in self.typeOf:
                 self.nextToken()
                 self.functionBody()
+            else:
+                self.sintax_analisys.append(SintaxError(self.itr.cur,"Valid Type"))
+
             
     def procedureBody(self) -> None: # Funcionando corretamente
-        if self.itr.cur.type == "IDE":
+        if self.itr.cur.lexema == "start":
+            self.main = True
+            self.nextToken()
+            if self.nextToken('{'):
+                while self.itr.cur.lexema in {'var','const'}:
+                    statement = self.global_dict[self.itr.cur.lexema]
+                    statement()
+                self.statementProduction()
+                self.nextToken('}')
+        elif self.itr.cur.type == "IDE":
             self.nextToken()
             self.paramsProduction()
             if self.nextToken('{'):
+                while self.itr.cur.lexema in {'var','const'}:
+                    statement = self.global_dict[self.itr.cur.lexema]
+                    statement()
                 self.statementProduction()
                 self.nextToken('}')
         else:
-            self.sintax_analisys.append(SintaxError(self.itr.cur,"Identifier"))
+            self.sintax_analisys.append(SintaxError(self.itr.cur,"Identifier or start"))
             self.itr.next()
         
     
@@ -212,6 +234,9 @@ class Parser():
             self.nextToken()
             self.paramsProduction()
             if self.nextToken('{'):
+                while self.itr.cur.lexema in {'var','const'}:
+                    statement = self.global_dict[self.itr.cur.lexema]
+                    statement()
                 self.statementProduction()
                 self.returnProduction()
                 self.nextToken('}')
@@ -273,6 +298,13 @@ class Parser():
             self.nextToken(')')
         elif self.itr.cur.type in exp or self.itr.cur.lexema in exp:
             self.nextToken()
+        elif self.itr.cur.type in {'global','local'}:
+            self.nextToken()
+            self.nextToken('.')
+            if self.itr.cur.type == 'IDE':
+                self.nextToken()
+                self.expressionProduction()
+            
         else:
             self.sintax_analisys.append(SintaxError(self.itr.cur,"Valid expression"))
             self.itr.next()
@@ -315,23 +347,29 @@ class Parser():
         if self.nextToken('return'):
             if self.itr.cur.type in exp or self.itr.cur.lexema in exp:
                 self.nextToken()
+                self.nextToken(';')
             elif self.itr.cur.type == 'IDE':
                 if self.itr.nxt.lexema == "(":
                     self.callFunction()
                 else:
                     self.expressionProduction()
+                self.nextToken(';')
             elif self.itr.cur.lexema == '(':
                 self.nextToken()
                 self.expressionProduction()
                 self.nextToken(')')
+                self.nextToken(';')
+            elif self.itr.cur.lexema in {'global','local'}:
+                self.varScoped()
             else:
                 self.sintax_analisys.append(SintaxError(self.itr.cur,"Valid return"))
                 self.itr.next()
-            self.nextToken(';')
 
     
     def varProduction(self) -> None: # Funcionando corretamente
-        if self.itr.cur.lexema == 'var':
+        if self.itr.cur == None:
+            return
+        elif self.itr.cur.lexema == 'var':
             self.nextToken()
             if self.nextToken('{'):
                 self.varDeclaration()
@@ -372,13 +410,15 @@ class Parser():
                         self.arrayUsage()
                     else:
                         self.expressionProduction()
-                elif self.itr.cur.lexema in {'local','global'}:
+                elif self.itr.cur.lexema in {'global', 'local'}:
                         self.nextToken()
                         self.nextToken('.')
                         if self.itr.cur.type == 'IDE':
-                            self.nextToken()
                             if self.itr.cur.lexema == '[':
+                                self.nextToken()
                                 self.arrayUsage()
+                            else:
+                                self.expressionProduction()  
                 else:
                     self.expressionProduction()
             elif self.itr.cur.lexema == '[':
@@ -436,9 +476,11 @@ class Parser():
                         self.nextToken()
                         self.nextToken('.')
                         if self.itr.cur.type == 'IDE':
-                            self.nextToken()
                             if self.itr.cur.lexema == '[':
+                                self.nextToken()
                                 self.arrayUsage()
+                            else:
+                                self.expressionProduction()  
                         else:
                             self.sintax_analisys.append(SintaxError(self.itr.cur,"Identifier"))
                     else:
@@ -519,23 +561,42 @@ class Parser():
         return self.sintax_analisys
 
 if __name__ == "__main__":
-    codigoFonte = '''procedure start {
-        if(a*b == c) then{
-            function int teste(string a, int b){
-                return a;
-            }
-        }
-        else{
-            typedef struct extends pessoa{
-                var { string nome = "roberto", sobrenome = "maia"; int idade = 17;}
-                const { string sexo = "M";}
-            }pessoa;
-        }
-        while(a < b){
-            print("roberto");
-            a = a+1;
-        }
-}'''
+    codigoFonte = '''var{
+    int a;
+    int b, c;
+}
+
+const{
+    real PI = 3.14;
+}
+
+procedure start{
+    var{
+        int a;
+        int b, c;
+        int d = 0, e = 0;
+    }
+
+    const{
+        boolean isNotTrue = false, isEmpty = false;
+    }
+
+    local.a = 10;
+    local.b = local.c;
+    local.d = local.g;
+    global.a = local.a;
+
+    a = b;
+    b = c + d;
+}
+
+function real decrementar (int param1, string param2){
+    while(a < 5){
+        global.a = global.a - 1;
+    }
+    return global.a;
+}
+'''
     gtokens = GenerateTokens(codigoFonte)
     tokens = gtokens.initialState()
     sintaxParser = Parser(tokens)
