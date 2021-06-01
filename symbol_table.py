@@ -3,49 +3,55 @@ class SymbolTable():
 
     def __init__(self, tokens:list) -> None:
         self.itr = MyIterator(tokens)
-        self.escopo = 0
-        self.table = []
-        self.scopeTree = []
+        self.id = 0
+        self.category = {
+            'var': self.variable, 
+            'const':self.const, 
+            'function': self.function, 
+            'procedure': self.procedure, 
+            'typedef':self.struct
+        }
+        
 
-    def constructTable(self):
-        categories = {
-        'var':self.variable, 
-        'const':self.constant,
-        'function':self.function, 
-        'procedure':self.procedure}
+    def populateTable(self) -> None:
         try:
-            if self.itr.cur.lexema in categories:
-                statement = self.statement_dict[self.itr.cur.lexema]
-                statement()
-            elif self.itr.cur.lexema in {'{','}'}:
-                self.bracketsCounter()
-            self.itr.next()
-            self.constructTable()
+            # self.escopo = Scope(self.id) #repensar onde instanciar esse escopo
+            if self.itr.cur.lexema in self.category:
+                category = self.category[self.itr.cur.lexema]
+                category()
+            elif self.itr.cur.type == 'IDE':
+                pass
+            elif self.itr.cur.lexema == '{':
+                self.escopo += 1
+            else:
+                self.itr.next()
+            self.populateTable()
         except StopIteration:
             pass
 
-    def bracketsCounter(self):
-        if self.itr.cur.lexema == '{':
-            self.escopo += 1
-            self.scopeTree.append(Node(self.escopo, self.escopo-1))
+
+class Scope():
+
+    def __init__(self, id:int)-> None:
+        self.id = id
+        self.childs = []
+
+    def insert(self, item) -> None:
+        self.childs.append(item)
+
+
+class DataToken():
+    pass
         
-        else:
-            self.escopo -= 1
 
-    def variable(self):
-        pass
-    
-    def constant(self):
-        pass
+   procedure start(){
+       while(a = b){
+           a++
+       }
+       if(a < b){
+           var{a = 0}
+       }
+       else{
 
-    def function(self):
-        pass
-
-    def procedure(self):
-        pass
-
-class Node():
-    def __init__(self,escopo,escopoPai) -> None:
-        self.escopo = escopo
-        self.pai = escopoPai
-        
+       }
+   }
