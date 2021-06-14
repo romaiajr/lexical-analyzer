@@ -2,6 +2,7 @@ from typing import List
 from iterator import MyIterator
 from sintax_error import SintaxError
 from generate_tokens import GenerateTokens
+from data_token import DataToken
 
 class Parser():
     typeOf = {"int", "real", "string", "boolean"}
@@ -10,7 +11,7 @@ class Parser():
         self.itr = MyIterator(tokens)
         self.sintax_analisys = [] # guarda os erros e sucessos do analisador sintático
         self.brackets_stack = [] # balanceamento de { }
-        self.main = False
+        self.notDeclaration = False
         self.statement_dict = {
             "read": self.readProduction,
             "print": self.printStatement,
@@ -21,13 +22,20 @@ class Parser():
             "if": self.ifProduction,
             "while": self.whileProduction,
         }
-
         self.global_dict = {
             "var": self.varProduction,  #
             "const": self.varProduction, #
             "function": self.functionProcedure, #
             "procedure": self.functionProcedure, #
         }
+        self.main = False
+        self.scope = 0 
+        self.var_tree = []
+        self.const_tree = []
+        self.function_tree = []
+        self.procedure_tree = []
+        self.struct_tree = []
+        self.data ={"lexema": "-", "type":"-", "initialized":"-", "scope":"-", "params":"-"}
         
     def sintaxParser(self) -> list:
         self.initProduction()
@@ -70,13 +78,25 @@ class Parser():
                     else:
                         self.sintax_analisys.append(SintaxError(self.itr.cur,"Identifier"))
                 if self.nextToken('{'):
+                    self.scope += 1
                     self.varProduction()
                     self.nextToken('}')
                     if self.itr.cur.type == 'IDE':
+                        self.data['lexema'] = self.itr.cur.lexema
+                        self.data['scope'] = f"local {self.scope}"
                         self.nextToken()
                     else:
                         self.sintax_analisys.append(SintaxError(self.itr.cur,"Identifier"))
                     self.nextToken(';')
+                    try:
+                         self.data['type'] = '-'
+                         self.data['initialized'] = '-'
+                         for item in self.struct_tree:
+                             if item.ide == self.data['lexema']:
+                                 raise OSError 
+                         self.struct_tree.append(DataToken(self.data))
+                    except OSError:
+                         pass
                     
 
                     
@@ -193,32 +213,48 @@ class Parser():
             self.nextToken('}')
 
     def functionProcedure(self) -> None: # Funcionando corretamente
+        self.data['initialized'] = '-'
         if self.itr.cur.lexema == 'procedure':
             self.nextToken()
             self.procedureBody()
         elif self.itr.cur.lexema == 'function':
             self.nextToken()
             if self.itr.cur.lexema in self.typeOf:
+                self.data['type'] = self.itr.cur.lexema
                 self.nextToken()
                 self.functionBody()
             else:
                 self.sintax_analisys.append(SintaxError(self.itr.cur,"Valid Type"))
+        self.data ={"lexema": "-", "type":"-", "initialized":"-", "scope":"-", "params":"-"}
 
             
     def procedureBody(self) -> None: # Funcionando corretamente
+        self.notDeclaration = True
         if self.itr.cur.lexema == "start":
             self.main = True
             self.nextToken()
             if self.nextToken('{'):
+                self.scope += 1
                 while self.itr.cur.lexema in {'var','const'}:
                     statement = self.global_dict[self.itr.cur.lexema]
                     statement()
                 self.statementProduction()
                 self.nextToken('}')
+                self.notDeclaration = False
         elif self.itr.cur.type == "IDE":
+            self.data['lexema'] = self.itr.cur.lexema
             self.nextToken()
             self.paramsProduction()
+            try:
+                self.data['scope'] = f"local {self.scope + 1}"
+                for item in self.procedure_tree:
+                    if item.ide == self.data['lexema']:
+                        raise OSError 
+                self.procedure_tree.append(DataToken(self.data))
+            except OSError:
+                pass
             if self.nextToken('{'):
+                self.scope += 1
                 while self.itr.cur.lexema in {'var','const'}:
                     statement = self.global_dict[self.itr.cur.lexema]
                     statement()
@@ -227,13 +263,25 @@ class Parser():
         else:
             self.sintax_analisys.append(SintaxError(self.itr.cur,"Identifier or start"))
             self.itr.next()
+        self.notDeclaration = False
         
     
     def functionBody(self) -> None: # Funcionando corretamente
+        self.notDeclaration = True
         if self.itr.cur.type == "IDE":
+            self.data['lexema'] = self.itr.cur.lexema
             self.nextToken()
             self.paramsProduction()
+            try:
+                self.data['scope'] = f"local {self.scope + 1}"
+                for item in self.function_tree:
+                    if item.ide == self.data['lexema']:
+                        raise OSError 
+                self.function_tree.append(DataToken(self.data))
+            except OSError:
+                pass
             if self.nextToken('{'):
+                self.scope += 1
                 while self.itr.cur.lexema in {'var','const'}:
                     statement = self.global_dict[self.itr.cur.lexema]
                     statement()
@@ -243,6 +291,7 @@ class Parser():
         else:
             self.sintax_analisys.append(SintaxError(self.itr.cur,"Identifier"))
             self.itr.next()
+        self.notDeclaration = False
 
     def expressionProduction(self) -> None: 
         self.orExpression()
@@ -311,20 +360,19 @@ class Parser():
                    
     def paramsProduction(self) -> None: # Funcionando corretamente
         if self.nextToken('('):
+            self.data['params'] = []
             self.params()
             self.nextToken(')')
 
     def params(self) -> None: # Funcionando corretamente
         if self.itr.cur.lexema in self.typeOf:
+            self.data['params'].append(self.itr.cur.lexema)
             self.nextToken()
             if self.itr.cur.type == 'IDE':
                 self.nextToken()
                 if self.itr.cur.lexema == ',':
                     self.nextToken()
                     self.params()
-        else:
-            self.sintax_analisys.append(SintaxError(self.itr.cur,"Valid param"))
-            self.itr.next()
 
     def callFunction(self) -> None: # Funcionando corretamente
         if self.itr.cur.type == 'IDE':
@@ -385,6 +433,7 @@ class Parser():
 
     def varDeclaration(self) -> None: # Funcionando corretamente
         if self.itr.cur.lexema in self.typeOf:
+            self.data["type"] = self.itr.cur.lexema #pegamos o tipo
             self.nextToken()
             self.variables()
             self.nextToken(';')
@@ -396,8 +445,10 @@ class Parser():
 
     def variables(self) -> None: # Funcionando corretamente
         if self.itr.cur.type == 'IDE':
+            self.data["lexema"] = self.itr.cur.lexema #pegamos o token
             self.nextToken()
             if self.itr.cur.lexema == '=':
+                self.data["t"] = True
                 self.nextToken()
                 if self.itr.cur.type == 'IDE':
                     if self.itr.nxt.lexema == '(':
@@ -434,6 +485,20 @@ class Parser():
                         self.nextToken('.')
                         if self.itr.cur.type == 'IDE':
                             self.nextToken()
+            if self.notDeclaration == False:
+                self.data["scope"] = "global"
+            else:
+                self.data["scope"] = f"local {self.scope}"
+            self.data["params"] = '-'
+            if self.data['initialized'] == '-':
+                self.data['initialized'] = False
+            try:
+                for item in self.var_tree:
+                    if item.scope == self.data['scope'] and item.ide == self.data['lexema']:
+                        raise OSError 
+                self.var_tree.append(DataToken(self.data))
+            except OSError:
+                pass
         else:
             self.sintax_analisys.append(SintaxError(self.itr.cur,"Identifier"))
             self.itr.next()
@@ -518,21 +583,37 @@ class Parser():
 
     def constDeclaration(self) -> None: # Funcionando corretamente
         if self.itr.cur.lexema in self.typeOf:
+            self.data["type"] = self.itr.cur.lexema #pegamos o tipo
             self.nextToken()
             self.constants()
             self.nextToken(';')
             self.constDeclaration()
     
-    def constants(self) -> None: # Funcionando corretamente
+    def constants(self) -> None: # Funcionando corretamente       
         exp = {'IDE','NRO','CAD','true','false'}
         if self.itr.cur.type == 'IDE':
+            self.data["lexema"] = self.itr.cur.lexema #pegamos o token
             self.nextToken()
             if self.nextToken('='):
+                self.data["t"] = True
                 if self.itr.cur.type in exp or self.itr.cur.lexema in exp:
                     self.nextToken()
-                    if self.itr.cur.lexema == ',':
-                        self.nextToken()
-                        self.constants()
+            if self.notDeclaration == False:
+                self.data["scope"] = "global"
+            else:
+                self.data["scope"] = f"local {self.scope}"
+            self.data["params"] = '-'
+            try:
+                for item in self.const_tree:
+                    if item.scope == self.data['scope'] and item.ide == self.data['lexema']:
+                        raise OSError 
+                self.const_tree.append(DataToken(self.data))
+            except OSError:
+                pass
+            if self.itr.cur.lexema == ',':
+                    self.nextToken()
+                    self.constants()
+            
         else:
             self.sintax_analisys.append(SintaxError(self.itr.cur,"Identifier"))
 
@@ -560,6 +641,22 @@ class Parser():
     def getSintaxAnalisys(self) -> list:
         return self.sintax_analisys
 
+    def getVarTree(self) -> list:
+        return self.var_tree
+
+    def getConstTree(self) -> list:
+        return self.const_tree
+        
+    def getFunctionTree(self) -> list:
+        return self.function_tree
+    
+    def getProcedureTree(self) -> list:
+        return self.procedure_tree
+
+    def getStructTree(self) -> list:
+        return self.struct_tree
+   
+
 if __name__ == "__main__":
     codigoFonte = '''var{
     int a;
@@ -580,32 +677,50 @@ procedure start{
     const{
         boolean isNotTrue = false, isEmpty = false;
     }
-
-    local.a = 10;
-    local.b = local.c;
-    local.d = local.g;
-    global.a = local.a;
-
     a = b;
     b = c + d;
+
+    
+    typedef struct {
+        var {int teste;}
+    } roberto;
 }
 
 function real decrementar (int param1, string param2){
+    var { int a;}
     while(a < 5){
         global.a = global.a - 1;
     }
     return global.a;
+}
+
+procedure teste (){
+    var {int escopo1 = 1;}
 }
 '''
     gtokens = GenerateTokens(codigoFonte)
     tokens = gtokens.initialState()
     sintaxParser = Parser(tokens)
     result = sintaxParser.sintaxParser()
-    for i in result:
-        print(i)
+    # for i in result:
+    #     print(i)
+    varTree = sintaxParser.getVarTree()
+    for i in varTree:
+        print(f"{i.ide} | {i.type} | {i.initialized} | {i.scope} | {i.params}")
+    print("\n")
+    constTree = sintaxParser.getConstTree()
+    for i in constTree:
+        print(f"{i.ide} | {i.type} | {i.initialized} | {i.scope} | {i.params}")
+    print("\n")
+    functionTree = sintaxParser.getFunctionTree()
+    for i in functionTree:
+        print(f"{i.ide} | {i.type} | {i.initialized} | {i.scope} | {i.params}")
+    print("\n")
+    procedureTree = sintaxParser.getProcedureTree()
+    for i in procedureTree:
+        print(f"{i.ide} | {i.type} | {i.initialized} | {i.scope} | {i.params}")
+    print("\n")
+    structTree = sintaxParser.getStructTree()
+    for i in structTree:
+        print(f"{i.ide} | {i.type} | {i.initialized} | {i.scope} | {i.params}")
 
-
-# Testar todas possibilidades de variáveis | OKAY
-# Testar todas as produções 
-# Tentar modificar o nextToken
-# Fazer erros para cada situação

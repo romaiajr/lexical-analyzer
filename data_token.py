@@ -2,12 +2,13 @@ from lexical_token import Token
 
 class DataToken ():
 
-    def __init__(self, token:Token, categoria:str, escopo, tipo:str = '-', params:list = '-', valor = '-'):
-        self.ide = token.lexema
-        self.category = categoria #função, variavel, procedure, const
-        self.type = tipo #int, bool, string
-        self.params = params
-        self.value = valor
-        self.scope = escopo
-
+    def __init__(self, obj):
+        self.ide = obj['lexema']
+        self.type = obj['type']
+        self.initialized = obj["initialized"]
+        self.scope = obj["scope"]
+        self.params = obj["params"]
         
+        
+
+
