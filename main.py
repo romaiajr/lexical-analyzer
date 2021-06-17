@@ -31,8 +31,11 @@ if os.path.isdir(path):
                         if type(item) == SintaxError:
                             sintaxErrors += 1
                     out.write("\n")
-                    semanticAnalyzer=SemanticAnalyzer(sintaxParser.getTokens(),sintaxParser.getSymbolTable())
-                    semanticAnalyzer.findErrors()
+                    # semanticAnalyzer=SemanticAnalyzer(sintaxParser.getTokens(),sintaxParser.getSymbolTable())
+                    # semanticAnalyzer.findErrors()
+                    semantic = SemanticAnalyzer(sintaxParser.getTokens())
+                    semantic.symbolTable()
+
                     for error in lexicalErrors:
                         out.write(str(error) + "\n")
                     

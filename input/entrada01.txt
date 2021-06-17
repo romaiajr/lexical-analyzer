@@ -8,3 +8,28 @@ const{
     int a=10;
 }
 
+procedure start{
+    var{
+        int a;
+        int b, c;
+        int d = 0, e = 0;
+    }
+
+    const{
+        boolean isNotTrue = false, isEmpty = false;
+    }
+    a = b;
+    b = c + d;
+}
+
+procedure teste (){
+    const {int escopo1 = 1;}
+}
+
+function real decrementar (int param1, string param2){
+    var { int a;}
+    while(a < 5){
+        global.a = global.a - 1;
+    }
+    return global.a;
+}
