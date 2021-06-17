@@ -2,6 +2,7 @@ import os
 from generate_tokens import GenerateTokens
 from sintax_analyzer import Parser
 from sintax_error import SintaxError
+from semantic_analyzer import SemanticAnalyzer
 path = "./input/"
 if os.path.isdir(path):
     files = os.listdir(path)
@@ -30,6 +31,8 @@ if os.path.isdir(path):
                         if type(item) == SintaxError:
                             sintaxErrors += 1
                     out.write("\n")
+                    semanticAnalyzer=SemanticAnalyzer(sintaxParser.getTokens(),sintaxParser.getSymbolTable())
+                    semanticAnalyzer.findErrors()
                     for error in lexicalErrors:
                         out.write(str(error) + "\n")
                     

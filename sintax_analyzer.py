@@ -1,3 +1,4 @@
+from lexical_token import Token
 from typing import List
 from iterator import MyIterator
 from sintax_error import SintaxError
@@ -40,6 +41,13 @@ class Parser():
     def sintaxParser(self) -> list:
         self.initProduction()
         return self.getSintaxAnalisys()
+    def getTokens(self)->list:
+        # tokens = [item for item in self.sintax_analisys if type(item)==Token]
+        tokens = []
+        for item in self.sintax_analisys:
+            if type(item)==Token:
+                tokens.append(item)
+        return tokens
 
     def initProduction(self) -> None: # Funcionando corretamente
         while self.itr.cur.lexema in self.global_dict:
@@ -49,7 +57,6 @@ class Parser():
                 break
         if self.main == False:
             self.sintax_analisys.append("Erro de sintaxe no final do arquivo: Missing procedure start.")
-
 
     def statementProduction(self) -> None: # Funcionando corretamente
         self.statementList()
@@ -97,9 +104,7 @@ class Parser():
                          self.struct_tree.append(DataToken(self.data))
                     except OSError:
                          pass
-                    
-
-                    
+                                     
     def whileProduction(self) -> None: # Funcionando corretamente
         self.nextToken('while')
         if self.nextToken('('):
@@ -517,7 +522,6 @@ class Parser():
             self.sintax_analisys.append(SintaxError(self.itr.cur,"Valid values"))
             self.itr.next()
 
-    
     def varUsage(self) -> None: # Funcionando corretamente
         exp = {'IDE','NRO','CAD','true','false'}
         if self.itr.cur.type == 'IDE':
@@ -656,7 +660,15 @@ class Parser():
     def getStructTree(self) -> list:
         return self.struct_tree
    
-
+    def getSymbolTable(self) ->list:
+        tableSymbol={
+            "varTree":self.var_tree,
+            "constTree":self.const_tree,
+            "functionTree":self.function_tree,
+            "procedureTree":self.procedure_tree,
+            "structTree":self.struct_tree
+        }
+        return tableSymbol
 if __name__ == "__main__":
     codigoFonte = '''var{
     int a;
