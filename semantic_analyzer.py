@@ -1,12 +1,13 @@
 from os import error
+import os
 from iterator import MyIterator
 
 #Checklist barema:
 #Duplicidade Global OK
 #Duplicidade Local OK
 #Duplicidade Funções OK
-#Identificador não declarado (Verificar se ele foi instanciado)
-#Chamada de função e procedures (verificar se existe e tals)
+#Identificador não declarado (Verificar se ele foi instanciado) OK
+#Chamada de função e procedures (verificar se existe e tals) OK
 #Atribuições à constantes (Não pode atribuir dps de instanciado)
 #Verificação de Tipos (atribuição, comparação, retornos)
 #Vetores Matrizes e Structs (deixar struct pra depois) (matriz e vetor é aquela questão onde os indices são inteiros [1] ou [i] onde i é inteiro)
@@ -37,7 +38,8 @@ class SemanticAnalyzer():
                 indice = self.methodsTable(indice)
             else:
                 indice += 1
-            
+        self.lookForErrors()
+        
         print('VAR TABLE')
         for item in self.var_table:
             print(f"{item.ide} {item.type} {item.scope} {item.initialized}")
@@ -53,7 +55,57 @@ class SemanticAnalyzer():
         print('\nERROS')
         for item in self.errors:
             print(item)
-            
+    def lookForErrors(self):
+        indice=0
+        escopo=0
+        while indice < len(self.tokens):
+            if self.tokens[indice].getType() == 'IDE':
+                if self.tokens[indice+1].getLexema()=="(":
+                    try:
+                        if not self.findMethod(indice,self.function_table) and not self.findMethod(indice,self.procedure_table):
+                            raise OSError
+                        #Função(chamada)
+                    except OSError:
+                        self.errors.append(f"Método [{self.tokens[indice].getLexema()}] presente na linha {self.tokens[indice].line} não foi declarado")
+                else:#Se for variável ou constante
+                    try:
+                        if not self.findVariable(indice,self.var_table,escopo) and not self.findVariable(indice,self.const_table,escopo):
+                            raise OSError
+                    except OSError:
+                        self.errors.append(f"Variavel [{self.tokens[indice].getLexema()}] presente na linha {self.tokens[indice].line} não foi declarado")
+            elif self.tokens[indice].getLexema() in {"function","procedure"}:
+                escopo+=1
+                while self.tokens[indice].getLexema() != "{":
+                    indice+=1
+            indice+=1
+    def findMethod(self,indice,local):
+        existe=False
+        for item in local:
+            if item.ide==self.tokens[indice].getLexema():
+                existe=True
+        return existe
+
+    def findVariable(self,indice,local,escopo):
+        print(escopo)
+        existe=False
+        for item in local:
+            if item.ide==self.tokens[indice].getLexema() and item.scope==escopo:
+                existe=True
+            elif item.ide==self.tokens[indice].getLexema() and item.scope=="global":
+                existe=True
+        return existe
+
+    # def findConst(self,indice,local,escopo):
+    #     print(escopo)
+    #     existe=False
+    #     for item in local:
+    #         if item.ide==self.tokens[indice].getLexema() and item.scope==escopo:
+    #             existe=True
+    #             while
+    #         elif item.ide==self.tokens[indice].getLexema() and item.scope=="global":
+    #             existe=True
+    #     return existe
+
     def varTable(self, indice) -> None:
         var_info = {'type': None, 'ide': None, 'initialized':False, 'scope': None}
         var_or_const = self.tokens[indice].getLexema()     
@@ -72,10 +124,10 @@ class SemanticAnalyzer():
                     else:
                         var_info['scope'] = self.scope
                     for item in self.var_table:
-                        if item.ide == var_info['ide'] and item.scope == var_info['scope']:
+                        if item.ide == var_info['ide'] and item.scope == var_info['scope']:#Verifica se já está na tabela
                             raise OSError
                     for item in self.const_table:
-                        if item.ide == var_info['ide'] and item.scope == var_info['scope']:
+                        if item.ide == var_info['ide'] and item.scope == var_info['scope']:#Verifica se já está na tabela
                             raise OSError  
                     if var_or_const == 'var':
                         self.var_table.append(VarToken(var_info))
