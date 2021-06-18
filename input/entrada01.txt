@@ -1,6 +1,7 @@
 var{
     int a;
     int b, c;
+    int roberto[2];
 }
 
 const{
@@ -14,12 +15,12 @@ procedure start{
         int b, c;
         int d = 0, e = 0,z=0;
     }
-
+    
     const{
         boolean isNotTrue = false, isEmpty = false;
     }
-    a = b;
-    b = d + d;
+    roberto[a][isNotTrue];
+    isNotTrue = true;
 }
 
 procedure teste (){
@@ -28,9 +29,9 @@ procedure teste (){
 
 function real decrementar (int param1, string param2){
     var { int a;}
-    while(a < 5){
-        global.a = global.a - 1;
+    while(a > 5){
+        local.a = a;
     }
     a=z+a;
-    return global.a;
+    return a;
 }

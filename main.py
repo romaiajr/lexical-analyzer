@@ -31,16 +31,17 @@ if os.path.isdir(path):
                         if type(item) == SintaxError:
                             sintaxErrors += 1
                     out.write("\n")
-                    # semanticAnalyzer=SemanticAnalyzer(sintaxParser.getTokens(),sintaxParser.getSymbolTable())
-                    # semanticAnalyzer.findErrors()
                     semantic = SemanticAnalyzer(sintaxParser.getTokens())
-                    semantic.symbolTable()
+                    semanticErrors = semantic.symbolTable()
+
+                    for error in semanticErrors:
+                        out.write(str(error) + "\n")
 
                     for error in lexicalErrors:
                         out.write(str(error) + "\n")
                     
-                    if len(lexicalErrors) + sintaxErrors > 0:
-                        print (f"ERRO: Encontrados {len(lexicalErrors) + sintaxErrors} erros durante a leitura do arquivo {file}")
+                    if len(lexicalErrors) + sintaxErrors + len(semanticErrors) > 0:
+                        print (f"ERRO: Encontrados {len(lexicalErrors) + sintaxErrors + len(semanticErrors)} erros durante a leitura do arquivo {file}")
                     else:
                         out.write(f"SUCESSO: O arquivo {file} foi lido com sucesso! Não foram encontrados erros lexicos.")
                         print(f"SUCESSO: O arquivo {file} foi lido com sucesso! Não foram encontrados erros lexicos.")

@@ -2,17 +2,6 @@ from os import error
 import os
 from iterator import MyIterator
 
-#Checklist barema:
-#Duplicidade Global OK
-#Duplicidade Local OK
-#Duplicidade Funções OK
-#Identificador não declarado (Verificar se ele foi instanciado) OK
-#Chamada de função e procedures (verificar se existe e tals) OK
-#Atribuições à constantes (Não pode atribuir dps de instanciado)
-#Verificação de Tipos (atribuição, comparação, retornos)
-#Vetores Matrizes e Structs (deixar struct pra depois) (matriz e vetor é aquela questão onde os indices são inteiros [1] ou [i] onde i é inteiro)
-
-
 class SemanticAnalyzer():
     typeOf = {"int", "real", "string", "boolean"}
     def __init__(self, tokens: list):
@@ -27,7 +16,7 @@ class SemanticAnalyzer():
         self.notGlobal = False
         self.scope = 0
         
-    def symbolTable(self) -> None:
+    def symbolTable(self) -> list:
         variables = {'var','const'}
         methods = {'function','procedure'}
         indice = 0
@@ -39,22 +28,8 @@ class SemanticAnalyzer():
             else:
                 indice += 1
         self.lookForErrors()
-        
-        print('VAR TABLE')
-        for item in self.var_table:
-            print(f"{item.ide} {item.type} {item.scope} {item.initialized}")
-        print('\nCONST TABLE')
-        for item in self.const_table:
-            print(f"{item.ide} {item.type} {item.scope} {item.initialized}")
-        print('\nPROCEDURE TABLE')
-        for item in self.procedure_table:
-            print(f"{item.ide} {item.returnType} {item.scope} {item.params}")
-        print('\nFUNCTION TABLE')
-        for item in self.function_table:
-            print(f"{item.ide} {item.returnType} {item.scope} {item.params}")
-        print('\nERROS')
-        for item in self.errors:
-            print(item)
+        return self.errors
+
     def lookForErrors(self):
         indice=0
         escopo=0
@@ -62,49 +37,98 @@ class SemanticAnalyzer():
             if self.tokens[indice].getType() == 'IDE':
                 if self.tokens[indice+1].getLexema()=="(":
                     try:
-                        if not self.findMethod(indice,self.function_table) and not self.findMethod(indice,self.procedure_table):
+                        if not self.findMethod(indice):
                             raise OSError
                         #Função(chamada)
                     except OSError:
                         self.errors.append(f"Método [{self.tokens[indice].getLexema()}] presente na linha {self.tokens[indice].line} não foi declarado")
                 else:#Se for variável ou constante
                     try:
-                        if not self.findVariable(indice,self.var_table,escopo) and not self.findVariable(indice,self.const_table,escopo):
+                        if not self.findVariable(indice,escopo):
                             raise OSError
+                        else:
+                            if self.tokens[indice + 1].getLexema() == '[':
+                                indice += 2
+                                try:
+                                    if self.tokens[indice].getType() == 'IDE':
+                                        if self.lookType(indice, escopo) != 'int':
+                                            raise OSError  
+                                    elif self.tokens[indice].getType() == 'NRO':
+                                        if str(self.tokens[indice].getLexema()).__contains__('.'):
+                                            raise OSError  
+                                    indice+=2
+                                    if self.tokens[indice].getLexema() == '[':
+                                        indice += 1
+                                        try:
+                                            if self.tokens[indice].getType() == 'IDE':
+                                                if self.lookType(indice, escopo) != 'int':
+                                                    raise OSError  
+                                            elif self.tokens[indice].getType() == 'NRO':
+                                                if str(self.tokens[indice].getLexema()).__contains__('.'):
+                                                    raise OSError  
+                                        except OSError:
+                                            self.errors.append(f"Indice [{self.tokens[indice].getLexema()}] inválido na linha {self.tokens[indice].getLine()}! O indice deve ser um número inteiro.")     
+                                except OSError:
+                                    self.errors.append(f"Indice [{self.tokens[indice].getLexema()}] inválido na linha {self.tokens[indice].getLine()}! O indice deve ser um número inteiro.")                       
                     except OSError:
                         self.errors.append(f"Variavel [{self.tokens[indice].getLexema()}] presente na linha {self.tokens[indice].line} não foi declarado")
             elif self.tokens[indice].getLexema() in {"function","procedure"}:
                 escopo+=1
                 while self.tokens[indice].getLexema() != "{":
                     indice+=1
+            elif self.tokens[indice].getLexema() in {'var','const'}:
+                while self.tokens[indice].getLexema() != '}':
+                    indice +=1
             indice+=1
-    def findMethod(self,indice,local):
+    
+    def findMethod(self,indice):
         existe=False
-        for item in local:
+        for item in self.function_table:
             if item.ide==self.tokens[indice].getLexema():
                 existe=True
+            if existe == True:
+                break
+        for item in self.procedure_table:
+            if item.ide==self.tokens[indice].getLexema():
+                existe=True
+            if existe == True:
+                break
         return existe
 
-    def findVariable(self,indice,local,escopo):
-        print(escopo)
+    def findVariable(self,indice,escopo):
         existe=False
-        for item in local:
+        for item in self.var_table:
             if item.ide==self.tokens[indice].getLexema() and item.scope==escopo:
                 existe=True
             elif item.ide==self.tokens[indice].getLexema() and item.scope=="global":
                 existe=True
+            if existe == True:
+                break
+        for item in self.const_table:
+            if item.ide==self.tokens[indice].getLexema() and item.scope==escopo:
+                existe=True
+            elif item.ide==self.tokens[indice].getLexema() and item.scope=="global":
+                existe=True
+            if existe == True:
+                token = self.tokens[indice]
+                while self.tokens[indice].getLexema() != ';':
+                    if self.tokens[indice].getLexema() == '=' and self.tokens[indice + 1].getLexema() not in {'>','<','='}:
+                        self.errors.append(f"Não é possível atribuir um valor à constante [{token.lexema}] na linha {token.line}")
+                    indice += 1
+                break
         return existe
 
-    # def findConst(self,indice,local,escopo):
-    #     print(escopo)
-    #     existe=False
-    #     for item in local:
-    #         if item.ide==self.tokens[indice].getLexema() and item.scope==escopo:
-    #             existe=True
-    #             while
-    #         elif item.ide==self.tokens[indice].getLexema() and item.scope=="global":
-    #             existe=True
-    #     return existe
+    def lookType(self,indice,escopo):
+        for item in self.var_table:
+            if item.ide==self.tokens[indice].getLexema() and item.scope==escopo:
+                return item.type
+            elif item.ide==self.tokens[indice].getLexema() and item.scope=="global":
+                return item.type
+        for item in self.const_table:
+            if item.ide==self.tokens[indice].getLexema() and item.scope==escopo:
+                return item.type
+            elif item.ide==self.tokens[indice].getLexema() and item.scope=="global":
+                return item.type
 
     def varTable(self, indice) -> None:
         var_info = {'type': None, 'ide': None, 'initialized':False, 'scope': None}

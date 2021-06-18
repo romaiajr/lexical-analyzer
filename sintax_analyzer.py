@@ -645,30 +645,6 @@ class Parser():
     def getSintaxAnalisys(self) -> list:
         return self.sintax_analisys
 
-    def getVarTree(self) -> list:
-        return self.var_tree
-
-    def getConstTree(self) -> list:
-        return self.const_tree
-        
-    def getFunctionTree(self) -> list:
-        return self.function_tree
-    
-    def getProcedureTree(self) -> list:
-        return self.procedure_tree
-
-    def getStructTree(self) -> list:
-        return self.struct_tree
-   
-    def getSymbolTable(self) ->list:
-        tableSymbol={
-            "varTree":self.var_tree,
-            "constTree":self.const_tree,
-            "functionTree":self.function_tree,
-            "procedureTree":self.procedure_tree,
-            "structTree":self.struct_tree
-        }
-        return tableSymbol
 if __name__ == "__main__":
     codigoFonte = '''var{
     int a;
@@ -714,25 +690,4 @@ procedure teste (){
     tokens = gtokens.initialState()
     sintaxParser = Parser(tokens)
     result = sintaxParser.sintaxParser()
-    # for i in result:
-    #     print(i)
-    varTree = sintaxParser.getVarTree()
-    for i in varTree:
-        print(f"{i.ide} | {i.type} | {i.initialized} | {i.scope} | {i.params}")
-    print("\n")
-    constTree = sintaxParser.getConstTree()
-    for i in constTree:
-        print(f"{i.ide} | {i.type} | {i.initialized} | {i.scope} | {i.params}")
-    print("\n")
-    functionTree = sintaxParser.getFunctionTree()
-    for i in functionTree:
-        print(f"{i.ide} | {i.type} | {i.initialized} | {i.scope} | {i.params}")
-    print("\n")
-    procedureTree = sintaxParser.getProcedureTree()
-    for i in procedureTree:
-        print(f"{i.ide} | {i.type} | {i.initialized} | {i.scope} | {i.params}")
-    print("\n")
-    structTree = sintaxParser.getStructTree()
-    for i in structTree:
-        print(f"{i.ide} | {i.type} | {i.initialized} | {i.scope} | {i.params}")
 
